@@ -92,7 +92,7 @@ class Client
     {
         $params = [
             "grant_type" => "authorization_code",
-            "refresh_token" => $authCode,
+            "code" => $authCode,
             "redirect_uri" => $redirectUri,
             "client_id" => $this->config["clientId"],
             "client_secret" => $this->config["clientSecret"]
@@ -108,7 +108,10 @@ class Client
             $this->_logAndThrow("Unable to get initial refresh token. 'refresh_token' not found in response. " . print_r($response, true));
         }
 
-        return $response;
+        return [
+            'refreshToken' => $this->config["refreshToken"],
+            'response' => $response,
+        ];
     }
 
     private function _makeCurlTokenRequest($params) {
