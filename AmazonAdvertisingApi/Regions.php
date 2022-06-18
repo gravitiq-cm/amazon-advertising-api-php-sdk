@@ -12,12 +12,12 @@ class Regions
         "eu" => array(
             "prod" => "advertising-api-eu.amazon.com",
             "sandbox" => "advertising-api-test.amazon.com",
-            "tokenUrl" => "api.amazon.com/auth/o2/token"
+            "tokenUrl" => "api.amazon.co.uk/auth/o2/token"
         ),
         "fe" => array(
             "prod" => "advertising-api-fe.amazon.com",
             "sandbox" => "advertising-api-test.amazon.com",
-            "tokenUrl" => "api.amazon.com/auth/o2/token"
+            "tokenUrl" => "api.amazon.co.jp/auth/o2/token"
         ),
     );
 }
