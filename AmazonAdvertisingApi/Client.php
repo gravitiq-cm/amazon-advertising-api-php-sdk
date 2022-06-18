@@ -64,11 +64,6 @@ class Client
      */
     public function doRefreshToken()
     {
-        $headers = [
-            "Content-Type: application/x-www-form-urlencoded;charset=UTF-8",
-            "User-Agent: {$this->userAgent}"
-        ];
-
         $refresh_token = rawurldecode($this->config["refreshToken"]);
 
         $params = [
@@ -78,7 +73,51 @@ class Client
             "client_secret" => $this->config["clientSecret"]
         ];
 
-        $data = "";
+        $response = $this->_makeCurlTokenRequest($params);
+
+        $response_array = json_decode($response["response"], true);
+        if (array_key_exists("access_token", $response_array)) {
+            $this->config["accessToken"] = $response_array["access_token"];
+        } else {
+            $this->_logAndThrow("Unable to refresh token. 'access_token' not found in response. " . print_r($response, true));
+        }
+
+        return $response;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function convertAuthCodeToRefreshToken($authCode, $redirectUri)
+    {
+        $params = [
+            "grant_type" => "authorization_code",
+            "refresh_token" => $authCode,
+            "redirect_uri" => $redirectUri,
+            "client_id" => $this->config["clientId"],
+            "client_secret" => $this->config["clientSecret"]
+        ];
+
+        $response = $this->_makeCurlTokenRequest($params);
+
+        $response_array = json_decode($response["response"], true);
+        if (array_key_exists("refresh_token", $response_array)) {
+            $this->config["refreshToken"] = $response_array["refresh_token"];
+            $this->config["accessToken"] = $response_array["access_token"];
+        } else {
+            $this->_logAndThrow("Unable to get initial refresh token. 'refresh_token' not found in response. " . print_r($response, true));
+        }
+
+        return $response;
+    }
+
+    private function _makeCurlTokenRequest($params) {
+        $headers = [
+            "Content-Type: application/x-www-form-urlencoded;charset=UTF-8",
+            "User-Agent: {$this->userAgent}"
+        ];
+
+        $data = '';
         foreach ($params as $k => $v) {
             $data .= "{$k}=" . rawurlencode($v) . "&";
         }
@@ -92,16 +131,7 @@ class Client
         $request->setOption(CURLOPT_POST, true);
         $request->setOption(CURLOPT_POSTFIELDS, rtrim($data, "&"));
 
-        $response = $this->_executeRequest($request);
-
-        $response_array = json_decode($response["response"], true);
-        if (array_key_exists("access_token", $response_array)) {
-            $this->config["accessToken"] = $response_array["access_token"];
-        } else {
-            $this->_logAndThrow("Unable to refresh token. 'access_token' not found in response. " . print_r($response, true));
-        }
-
-        return $response;
+        return $this->_executeRequest($request);
     }
 
     public function listProfiles()
