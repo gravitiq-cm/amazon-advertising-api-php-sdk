@@ -8,27 +8,23 @@ require_once "CurlRequest.php";
 
 class Client
 {
-    private $config = array(
+    private $config = [
         "clientId" => null,
         "clientSecret" => null,
         "region" => null,
         "accessToken" => null,
         "refreshToken" => null,
         "sandbox" => false,
-        "isLogedEnabled" => false,
-        "logPath" => ''
-    );
+    ];
 
-    private $apiVersion = null;
-    private $applicationVersion = null;
-    private $userAgent = null;
+    private $apiVersion;
+    private $applicationVersion;
+    private $userAgent;
     private $endpoint = null;
     private $tokenUrl = null;
     private $requestId = null;
-    private $endpoints = null;
-    private $versionStrings = null;
-    private $logPath = '';
-    private $isLogedEnabled = false;
+    private $endpoints;
+    private $versionStrings;
     public $profileId = null;
     /*
     Also note that Amazon Attribution accounts are a separate type of "profile". Only Amazon Attribution profiles can be
@@ -38,6 +34,9 @@ class Client
     */
     public $profileIdAttribution = null;
 
+    /**
+     * @throws \Exception
+     */
     public function __construct($config)
     {
         $regions = new Regions();
@@ -53,8 +52,6 @@ class Client
         $this->_validateConfig($config);
         $this->_validateConfigParameters();
         $this->_setEndpoints();
-        $this->isLogedEnabled = isset($config['isLogedEnabled']) ? $config['isLogedEnabled'] : false;
-        $this->logPath = isset($config['logPath']) ? $config['logPath'] : false;
 
         if (is_null($this->config["accessToken"]) && !is_null($this->config["refreshToken"])) {
             /* convenience */
@@ -62,20 +59,24 @@ class Client
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function doRefreshToken()
     {
-        $headers = array(
+        $headers = [
             "Content-Type: application/x-www-form-urlencoded;charset=UTF-8",
             "User-Agent: {$this->userAgent}"
-        );
+        ];
 
         $refresh_token = rawurldecode($this->config["refreshToken"]);
 
-        $params = array(
+        $params = [
             "grant_type" => "refresh_token",
             "refresh_token" => $refresh_token,
             "client_id" => $this->config["clientId"],
-            "client_secret" => $this->config["clientSecret"]);
+            "client_secret" => $this->config["clientSecret"]
+        ];
 
         $data = "";
         foreach ($params as $k => $v) {
@@ -515,9 +516,10 @@ class Client
 
     public function bulkGetKeywordBidRecommendations($adGroupId, $data)
     {
-        $data = array(
+        $data = [
             "adGroupId" => $adGroupId,
-            "keywords" => $data);
+            "keywords" => $data
+        ];
         return $this->_operation("sp/keywords/bidRecommendations", $data, "POST");
     }
 
@@ -699,17 +701,17 @@ class Client
 
     public function archiveTargetingClause($targetId)
     {
-        return $this->_operation("sp/targets/" . $targetId, array(), 'DELETE');
+        return $this->_operation("sp/targets/" . $targetId, [], 'DELETE');
     }
 
     public function archiveTargetingClauseBrands($targetId)
     {
-        return $this->_operation("sb/targets/" . $targetId, array(), 'DELETE');
+        return $this->_operation("sb/targets/" . $targetId, [], 'DELETE');
     }
 
     public function archiveTargetingClauseSponsoredDisplay($targetId)
     {
-        return $this->_operation("sd/targets/" . $targetId, array(), 'DELETE');
+        return $this->_operation("sd/targets/" . $targetId, [], 'DELETE');
     }
 
 
@@ -824,7 +826,7 @@ class Client
     }
 
     /** Amazon attribution start  */
-    public function getAttributionlistPublishers($data = null)
+    public function getAttributionListPublishers($data = null)
     {
         return $this->_operation("attribution/publishers", $data);
     }
@@ -849,7 +851,7 @@ class Client
         return $this->_operation("attribution/advertisers", $data);
     }
 
-    /** Amazon atribution end */
+    /** Amazon attribution end */
 
     public function getHistoryData($data = null)
     {
@@ -863,18 +865,19 @@ class Client
      * @param $imageType - one of PNG|JPEG|GIF
      * @param $fileName - example 'logo.png'
      * @return array
+     * @throws \Exception
      */
     public function createAsset($data, $filePath, $imageType, $fileName)
     {
-        $headers = array(
+        $headers = [
             'Content-Disposition: ' . $fileName
-        );
-        return $this->_UploadAsset($data, array($filePath), $headers, $imageType, $fileName);
+        ];
+        return $this->_UploadAsset($data, [$filePath], $headers, $imageType, $fileName);
     }
 
     private function _download($location, $gunzip = false)
     {
-        $headers = array();
+        $headers = [];
 
         if (!$gunzip) {
             /* only send authorization header when not downloading actual file */
@@ -907,13 +910,13 @@ class Client
         return $this->_executeRequest($request);
     }
 
-    private function _operation($interface, $params = array(), $method = "GET", $additionalHeaders = array())
+    private function _operation($interface, $params = [], $method = "GET", $additionalHeaders = [])
     {
-        $headers = array(
+        $headers = [
             "Authorization: bearer {$this->config["accessToken"]}",
             "Content-Type: application/json",
             "User-Agent: {$this->userAgent}"
-        );
+        ];
 
 
         if (!is_null($this->config['clientId'])) {
@@ -930,7 +933,7 @@ class Client
         $request = new CurlRequest();
         $url = "{$this->endpoint}/{$interface}";
 
-        $excludedVersionForInterfaceList = array('brands', 'stores/assets', 'sb/campaigns', 'sb/targets', 'sb/keywords');
+        $excludedVersionForInterfaceList = ['brands', 'stores/assets', 'sb/campaigns', 'sb/targets', 'sb/keywords'];
         if (array_search($interface, $excludedVersionForInterfaceList) !== false) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
         }
@@ -951,7 +954,6 @@ class Client
         }
 
         $this->requestId = null;
-        $data = "";
 
         switch (strtolower($method)) {
             case "get":
@@ -984,10 +986,19 @@ class Client
     }
 
 
-    private function _UploadAsset($params = array(), $filenames = array(), $additionalHeaders = array(), $imageType, $fileName)
+    /**
+     * @param array $params
+     * @param array $filenames
+     * @param array $additionalHeaders
+     * @param string $imageType
+     * @param string $fileName
+     * @return array
+     * @throws \Exception
+     */
+    private function _UploadAsset($params, $filenames, $additionalHeaders, $imageType, $fileName)
     {
 
-        $files = array();
+        $files = [];
         foreach ($filenames as $f) {
             $files[$f] = file_get_contents($f);
         }
@@ -998,12 +1009,12 @@ class Client
         $delimiter = '-------------' . $boundary;
         $post_data = $this->build_data_files($boundary, $params, $files, $imageType, $fileName);
 
-        $headers = array(
+        $headers = [
             "Authorization: bearer {$this->config["accessToken"]}",
             "Content-Type: multipart/form-data; boundary=" . $delimiter,
             "Content-Length: " . strlen($post_data),
             "User-Agent: {$this->userAgent}"
-        );
+        ];
 
         if (!is_null($this->profileId)) {
             array_push($headers, "Amazon-Advertising-API-Scope: {$this->profileId}");
@@ -1033,6 +1044,9 @@ class Client
     }
 
 
+    /**
+     * @throws \Exception
+     */
     protected function build_data_files($boundary, $fields, $files, $imageType, $fileName)
     {
 
@@ -1092,7 +1106,7 @@ class Client
             return $this->_download($response_info["redirect_url"], true);
         }
 
-        if (!preg_match("/^(2|3)\d{2}$/", $response_info["http_code"])) {
+        if (!preg_match("/^([23])\d{2}$/", $response_info["http_code"])) {
             $requestId = 0;
             $json = json_decode($response, true);
             if (!is_null($json)) {
@@ -1100,22 +1114,22 @@ class Client
                     $requestId = json_decode($response, true)["requestId"];
                 }
             }
-            $requestResponse = array("success" => false,
-                "code" => $response_info["http_code"],
-                "response" => $response,
-                "requestId" => $requestId);
-            $this->_logAllRequests($request, $requestResponse);
-            return $requestResponse;
+            $success = false;
         } else {
-            $requestResponse = array("success" => true,
-                "code" => $response_info["http_code"],
-                "response" => $response,
-                "requestId" => $this->requestId);
-            $this->_logAllRequests($request, $requestResponse);
-            return $requestResponse;
+            $success = true;
+            $requestId = $this->requestId;
         }
+        return [
+            "success" => $success,
+            "code" => $response_info["http_code"],
+            "response" => $response,
+            "requestId" => $requestId
+        ];
     }
 
+    /**
+     * @throws \Exception
+     */
     private function _validateConfig($config)
     {
         if (is_null($config)) {
@@ -1129,9 +1143,11 @@ class Client
                 $this->_logAndThrow("Unknown parameter '{$k}' in config.");
             }
         }
-        return true;
     }
 
+    /**
+     * @throws \Exception
+     */
     private function _validateConfigParameters()
     {
         foreach ($this->config as $k => $v) {
@@ -1170,9 +1186,11 @@ class Client
                     break;
             }
         }
-        return true;
     }
 
+    /**
+     * @throws \Exception
+     */
     private function _setEndpoints()
     {
         /* check if region exists and set api/token endpoints */
@@ -1188,32 +1206,15 @@ class Client
         } else {
             $this->_logAndThrow("Invalid region.");
         }
-        return true;
     }
 
+    /**
+     * @param $message
+     * @throws \Exception
+     */
     private function _logAndThrow($message)
     {
         error_log($message, 0);
         throw new \Exception($message);
     }
-
-    private function _logAllRequests($request, $requestResponse)
-    {
-        if ($this->isLogedEnabled === true) {
-            $excludeList = array('https://api.amazon.com/auth/o2/token', 'https://advertising-api-eu.amazon.com/v2/profiles');
-            $mustExlcude = false;
-            foreach ($request->getOptionsArray() as $option) {
-                if (isset($option[CURLOPT_URL]) AND ((array_search($option[CURLOPT_URL], $excludeList) !== false) OR (strpos($option[CURLOPT_URL], 'https://amazon-advertising-api-snapshots-prod-usamazon') !== false))) {
-                    $mustExlcude = true;
-                }
-            }
-            if ($mustExlcude === false) {
-                file_put_contents($this->logPath . 'Advertising_log_' . date('Y_m_d') . '.log',
-                    date('H:i:s') . ' ' . print_r($request->getOptionsArray(), true) . 'RESPONSE = ' . print_r($requestResponse, true), FILE_APPEND);
-
-            }
-        }
-
-    }
-
 }

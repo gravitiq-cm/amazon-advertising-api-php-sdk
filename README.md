@@ -1,12 +1,6 @@
-[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
-
 ## Synopsis
 
-
-~~Official~~ Amazon Advertising API PHP client library.
-
-This repository has been deprecated and will no longer receive updates.
-
+Modified version of the official (but deprecated) Amazon Advertising API PHP client library to work with more current versions of the advertising APIs. 
 
 ## Requirements
 
@@ -15,9 +9,14 @@ cURL >= 7.18
 
 ## Documentation
 
-[API Reference](https://advertising.amazon.com/API/docs)<br/>
-[Access Request](https://advertising.amazon.com/API)<br/>
-[Getting Started](https://advertising.amazon.com/API/docs/v2/guides/get_started)
+[API Reference](https://advertising.amazon.com/API/docs) <br/>
+[Access Request](https://advertising.amazon.com/API) <br/>
+[Getting Started](https://advertising.amazon.com/API/docs/en-us/getting-started/overview)
+
+# ⚠ Note about this page ⚠
+Nothing on this page below this line has been updated from the original repository. Refer to the API documentation for details of the calls you can make.
+
+---
 
 ## Tutorials
 [Register Sandbox Profile](https://git.io/vPKMl) - This tutorial will show you how to register a profile in sandbox using CURL.<br/>

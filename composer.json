@@ -1,7 +1,7 @@
 {
-    "name": "rams007/amazon-advertising-api-php-sdk",
+    "name": "gravitiq/amazon-advertising-api-php-sdk",
     "type": "library",
-    "description": "Amazon Advertising API Client Library",
+    "description": "Amazon Advertising API Client Library (modified)",
     "keywords": [
         "amazon",
         "advertising",
@@ -25,12 +25,14 @@
     },
     "require": {
         "ext-curl": "*",
-        "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        "ext-json": "*",
+        "ext-zlib": "*"
     },
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/rams007/amazon-advertising-api-php-sdk"
+            "url": "https://github.com/gravitiq-cm/amazon-advertising-api-php-sdk"
         }
     ]
 }
