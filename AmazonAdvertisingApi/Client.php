@@ -656,6 +656,15 @@ class Client
         return $req;
     }
 
+    /**
+     * Always returns the status of the report. Original getReport() method will automatically return the document.
+     */
+    public function getReportStatus($reportId)
+    {
+        $req = $this->_operation("reports/{$reportId}");
+        return $req;
+    }
+
     public function getTargetingClause($targetId)
     {
         return $this->_operation("sp/targets/{$targetId}");
