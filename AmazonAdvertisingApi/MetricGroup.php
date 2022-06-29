@@ -4,7 +4,7 @@ namespace AmazonAdvertisingApi;
 
 class MetricGroup
 {
-    const CAMPAIGN_SP_ALL                       = 'c_sp_all';
+    const CAMPAIGN_SPRODUCT_ALL                 = 'c_sp_all';
     const CAMPAIGN_SBRAND_ALL                   = 'c_sb_all';
     const CAMPAIGN_SBVIDEO_ALL                  = 'c_sbv_all';
     const CAMPAIGN_SDISPLAY_ALL                 = 'c_sd_all';
@@ -24,18 +24,18 @@ class MetricGroup
     const KEYWORD_SPRODUCT_ALL                  = 'kw_sp_all';
     const KEYWORD_SBRAND_ALL                    = 'kw_sb_all';
     const KEYWORD_SBVIDEO_ALL                   = 'kw_sbv_all';
-    const SEARCH_TERM_SPRODUCT_KEYWORD_ALL      = 'st_sp_kyw_all';
-    const SEARCH_TERM_SPRODUCT_TARGETS_ALL      = 'st_sp_tar_all';
+    const SEARCH_TERM_KEYWORD_SPRODUCT_ALL      = 'st_kw_sp_all';
+    const SEARCH_TERM_TARGET_SPRODUCT_ALL       = 'st_tar_sp_all';
     const SEARCH_TERM_SBRAND_ALL                = 'st_sb_all';
     const SEARCH_TERM_SBVIDEO_ALL               = 'st_sbv_all';
-    const ASIN_SPRODUCT_ALL_KEYWORD             = 'asin_sp_all_kw';
-    const ASIN_SPRODUCT_ALL_TARGET              = 'asin_sp_all_target';
+    const ASIN_KEYWORD_SPRODUCT_ALL             = 'asin_kw_sp_all';
+    const ASIN_TARGET_SPRODUCT_ALL              = 'asin_tar_sp_all';
     const ASIN_SDISPLAY_ALL                     = 'asin_sd_all';
     const AD_SBRAND_ALL                         = 'ad_sb_all';
     const AD_SBVIDEO_ALL                        = 'ad_sbv_all';
-    const MATCHED_TARGET_SDISPLAY_CAMPAIGNS_ALL = 'mt_sd_cam_all';
-    const MATCHED_TARGET_SDISPLAY_AD_GROUPS_ALL = 'mt_sd_adg_all';
-    const MATCHED_TARGET_SDISPLAY_TARGETS_ALL   = 'mt_sd_tar_all';
+    const MATCHED_TARGET_CAMPAIGNS_SDISPLAY_ALL = 'mt_cam_sd_all';
+    const MATCHED_TARGET_AD_GROUPS_SDISPLAY_ALL = 'mt_adg_sd_all';
+    const MATCHED_TARGET_TARGETS_SDISPLAY_ALL   = 'mt_tar_sd_all';
 
 
     const PRODUCT_AD_SP_ALL = 'pa_sp_all';
@@ -89,17 +89,17 @@ class MetricGroup
             return 'adGroupId,adGroupName,applicableBudgetRuleId,applicableBudgetRuleName,attributedConversions14d,attributedConversions14dSameSKU,attributedDetailPageViewsClicks14d,attributedOrderRateNewToBrand14d,attributedOrdersNewToBrand14d,attributedOrdersNewToBrandPercentage14d,attributedSales14d,attributedSales14dSameSKU,attributedSalesNewToBrand14d,attributedSalesNewToBrandPercentage14d,attributedUnitsOrderedNewToBrand14d,attributedUnitsOrderedNewToBrandPercentage14d,campaignBudget,campaignBudgetType,campaignId,campaignName,campaignRuleBasedBudget,campaignStatus,clicks,cost,dpv14d,impressions,keywordBid,keywordStatus,keywordText,matchType,searchTermImpressionRank,searchTermImpressionShare,unitsSold14d';
         } elseif (self::KEYWORD_SBVIDEO_ALL === $groupName) {
             return 'adGroupId,adGroupName,attributedConversions14d,attributedConversions14dSameSKU,attributedSales14d,attributedSales14dSameSKU,campaignBudget,campaignBudgetType,campaignId,campaignName,campaignStatus,clicks,cost,impressions,keywordBid,keywordStatus,keywordText,matchType,vctr,video5SecondViewRate,video5SecondViews,videoCompleteViews,videoFirstQuartileViews,videoMidpointViews,videoThirdQuartileViews,videoUnmutes,viewableImpressions,vtr,dpv14d,attributedDetailPageViewsClicks14d,attributedOrderRateNewToBrand14d,attributedOrdersNewToBrand14d,attributedOrdersNewToBrandPercentage14d,attributedSalesNewToBrand14d,attributedSalesNewToBrandPercentage14d,attributedUnitsOrderedNewToBrand14d,attributedUnitsOrderedNewToBrandPercentage14d';
-        } elseif (self::SEARCH_TERM_SPRODUCT_KEYWORD_ALL === $groupName) {
+        } elseif (self::SEARCH_TERM_KEYWORD_SPRODUCT_ALL === $groupName) {
             return 'adGroupId,adGroupName,attributedConversions14d,attributedConversions14dSameSKU,attributedConversions1d,attributedConversions1dSameSKU,attributedConversions30d,attributedConversions30dSameSKU,attributedConversions7d,attributedConversions7dSameSKU,attributedSales14d,attributedSales14dSameSKU,attributedSales1d,attributedSales1dSameSKU,attributedSales30d,attributedSales30dSameSKU,attributedSales7d,attributedSales7dSameSKU,attributedUnitsOrdered14d,attributedUnitsOrdered14dSameSKU,attributedUnitsOrdered1d,attributedUnitsOrdered1dSameSKU,attributedUnitsOrdered30d,attributedUnitsOrdered30dSameSKU,attributedUnitsOrdered7d,attributedUnitsOrdered7dSameSKU,campaignBudget,campaignBudgetType,campaignId,campaignName,campaignStatus,clicks,cost,currency,impressions,keywordStatus,keywordText,matchType';
-        } elseif (self::SEARCH_TERM_SPRODUCT_TARGETS_ALL === $groupName) {
+        } elseif (self::SEARCH_TERM_TARGET_SPRODUCT_ALL === $groupName) {
             return 'adGroupId,adGroupName,attributedConversions14d,attributedConversions14dSameSKU,attributedConversions1d,attributedConversions1dSameSKU,attributedConversions30d,attributedConversions30dSameSKU,attributedConversions7d,attributedConversions7dSameSKU,attributedSales14d,attributedSales14dSameSKU,attributedSales1d,attributedSales1dSameSKU,attributedSales30d,attributedSales30dSameSKU,attributedSales7d,attributedSales7dSameSKU,attributedUnitsOrdered14d,attributedUnitsOrdered14dSameSKU,attributedUnitsOrdered1d,attributedUnitsOrdered1dSameSKU,attributedUnitsOrdered30d,attributedUnitsOrdered30dSameSKU,attributedUnitsOrdered7d,attributedUnitsOrdered7dSameSKU,campaignBudget,campaignBudgetType,campaignId,campaignName,campaignStatus,clicks,cost,impressions,targetingExpression,targetingText,targetingType';
         } elseif (self::SEARCH_TERM_SBRAND_ALL === $groupName) {
             return 'adGroupId,adGroupName,attributedConversions14d,attributedSales14d,campaignBudget,campaignBudgetType,campaignId,campaignName,campaignStatus,clicks,cost,impressions,keywordBid,keywordStatus,keywordText,matchType,searchTermImpressionRank,searchTermImpressionShare';
         } elseif (self::SEARCH_TERM_SBVIDEO_ALL === $groupName) {
             return 'adGroupId,adGroupName,attributedConversions14d,attributedSales14d,campaignBudget,campaignBudgetType,campaignStatus,clicks,cost,impressions,keywordBid,keywordStatus,keywordText,matchType,vctr,video5SecondViewRate,video5SecondViews,videoCompleteViews,videoFirstQuartileViews,videoMidpointViews,videoThirdQuartileViews,videoUnmutes,viewableImpressions,vtr,dpv14d,attributedDetailPageViewsClicks14d,attributedOrderRateNewToBrand14d,attributedOrdersNewToBrand14d,attributedOrdersNewToBrandPercentage14d,attributedSalesNewToBrand14d,attributedSalesNewToBrandPercentage14d,attributedUnitsOrderedNewToBrand14d,attributedUnitsOrderedNewToBrandPercentage14d';
-        } elseif (self::ASIN_SPRODUCT_ALL_KEYWORD === $groupName) {
+        } elseif (self::ASIN_KEYWORD_SPRODUCT_ALL === $groupName) {
             return 'adGroupId,adGroupName,asin,attributedSales14dOtherSKU,attributedSales1dOtherSKU,attributedSales30dOtherSKU,attributedSales7dOtherSKU,attributedUnitsOrdered14d,attributedUnitsOrdered14dOtherSKU,attributedUnitsOrdered1d,attributedUnitsOrdered1dOtherSKU,attributedUnitsOrdered30d,attributedUnitsOrdered30dOtherSKU,attributedUnitsOrdered7d,attributedUnitsOrdered7dOtherSKU,campaignId,campaignName,currency,keywordId,keywordText,matchType,otherAsin,sku,targetingExpression,targetingType';
-        } elseif (self::ASIN_SPRODUCT_ALL_TARGET === $groupName) {
+        } elseif (self::ASIN_TARGET_SPRODUCT_ALL === $groupName) {
             return 'adGroupId,adGroupName,asin,attributedSales14dOtherSKU,attributedSales1dOtherSKU,attributedSales30dOtherSKU,attributedSales7dOtherSKU,attributedUnitsOrdered14d,attributedUnitsOrdered14dOtherSKU,attributedUnitsOrdered1d,attributedUnitsOrdered1dOtherSKU,attributedUnitsOrdered30d,attributedUnitsOrdered30dOtherSKU,attributedUnitsOrdered7d,attributedUnitsOrdered7dOtherSKU,campaignId,campaignName,currency,matchType,otherAsin,sku,targetId,targetingExpression,targetingText,targetingType';
         } elseif (self::ASIN_SDISPLAY_ALL === $groupName) {
             return 'adGroupId,adGroupName,asin,attributedSales14dOtherSKU,attributedSales1dOtherSKU,attributedSales30dOtherSKU,attributedSales7dOtherSKU,attributedUnitsOrdered14dOtherSKU,attributedUnitsOrdered1dOtherSKU,attributedUnitsOrdered30dOtherSKU,attributedUnitsOrdered7dOtherSKU,campaignId,campaignName,currency,otherAsin,sku';
@@ -107,11 +107,11 @@ class MetricGroup
             return 'adGroupId,adGroupName,applicableBudgetRuleId,applicableBudgetRuleName,attributedConversions14d,attributedConversions14dSameSKU,attributedDetailPageViewsClicks14d,attributedOrderRateNewToBrand14d,attributedOrdersNewToBrand14d,attributedOrdersNewToBrandPercentage14d,attributedSales14d,attributedSales14dSameSKU,attributedSalesNewToBrand14d,attributedSalesNewToBrandPercentage14d,attributedUnitsOrderedNewToBrand14d,attributedUnitsOrderedNewToBrandPercentage14d,campaignBudget,campaignBudgetType,campaignId,campaignName,campaignRuleBasedBudget,campaignStatus,clicks,cost,dpv14d,impressions,unitsSold14d,vctr,video5SecondViewRate,video5SecondViews,videoCompleteViews,videoFirstQuartileViews,videoMidpointViews,videoThirdQuartileViews,videoUnmutes,viewableImpressions,vtr';
         } elseif (self::AD_SBVIDEO_ALL === $groupName) {
             return 'adGroupId,adGroupName,applicableBudgetRuleId,applicableBudgetRuleName,attributedConversions14d,attributedConversions14dSameSKU,attributedDetailPageViewsClicks14d,attributedOrderRateNewToBrand14d,attributedOrdersNewToBrand14d,attributedOrdersNewToBrandPercentage14d,attributedSales14d,attributedSales14dSameSKU,attributedSalesNewToBrand14d,attributedSalesNewToBrandPercentage14d,attributedUnitsOrderedNewToBrand14d,attributedUnitsOrderedNewToBrandPercentage14d,campaignBudget,campaignBudgetType,campaignId,campaignName,campaignRuleBasedBudget,campaignStatus,clicks,cost,dpv14d,impressions,unitsSold14d,vctr,video5SecondViewRate,video5SecondViews,videoCompleteViews,videoFirstQuartileViews,videoMidpointViews,videoThirdQuartileViews,videoUnmutes,viewableImpressions,vtr';
-        } elseif (self::MATCHED_TARGET_SD_CAPAIGNS_ALL === $groupName) {
+        } elseif (self::MATCHED_TARGET_CAMPAIGNS_SDISPLAY_ALL === $groupName) {
             return 'attributedConversions14d,attributedConversions14dSameSKU,attributedConversions1d,attributedConversions1dSameSKU,attributedConversions30d,attributedConversions30dSameSKU,attributedConversions7d,attributedConversions7dSameSKU,attributedDetailPageView14d,attributedOrdersNewToBrand14d,attributedSales14d,attributedSales14dSameSKU,attributedSales1d,attributedSales1dSameSKU,attributedSales30d,attributedSales30dSameSKU,attributedSales7d,attributedSales7dSameSKU,attributedSalesNewToBrand14d,attributedUnitsOrdered14d,attributedUnitsOrdered1d,attributedUnitsOrdered30d,attributedUnitsOrdered7d,attributedUnitsOrderedNewToBrand14d,campaignBudget,campaignId,campaignName,campaignStatus,clicks,cost,costType,currency,impressions,viewAttributedConversions14d,viewAttributedDetailPageView14d,viewAttributedSales14d,viewAttributedUnitsOrdered14d,viewImpressions,viewAttributedOrdersNewToBrand14d,viewAttributedSalesNewToBrand14d,viewAttributedUnitsOrderedNewToBrand14d';
-        } elseif (self::MATCHED_TARGET_SD_AD_GROUPS_ALL === $groupName) {
+        } elseif (self::MATCHED_TARGET_AD_GROUPS_SDISPLAY_ALL === $groupName) {
             return 'adGroupId,adGroupName,attributedConversions14d,attributedConversions14dSameSKU,attributedConversions1d,attributedConversions1dSameSKU,attributedConversions30d,attributedConversions30dSameSKU,attributedConversions7d,attributedConversions7dSameSKU,attributedDetailPageView14d,attributedOrdersNewToBrand14d,attributedSales14d,attributedSales14dSameSKU,attributedSales1d,attributedSales1dSameSKU,attributedSales30d,attributedSales30dSameSKU,attributedSales7dSameSKU,attributedUnitsOrdered14d,attributedUnitsOrdered1d,attributedUnitsOrdered30d,attributedUnitsOrdered7d,attributedUnitsOrderedNewToBrand14d,bidOptimization,campaignId,campaignName,clicks,cost,currency,impressions,viewAttributedConversions14d,viewAttributedDetailPageView14d,viewAttributedSales14d,viewAttributedUnitsOrdered14d,viewImpressions,viewAttributedOrdersNewToBrand14d,viewAttributedSalesNewToBrand14d,viewAttributedUnitsOrderedNewToBrand14d';
-        } elseif (self::MATCHED_TARGET_SD_TARGETS_ALL === $groupName) {
+        } elseif (self::MATCHED_TARGET_TARGETS_SDISPLAY_ALL === $groupName) {
             return 'adGroupId,adGroupName,attributedConversions14d,attributedConversions14dSameSKU,attributedConversions1d,attributedConversions1dSameSKU,attributedConversions30d,attributedConversions30dSameSKU,attributedConversions7d,attributedConversions7dSameSKU,attributedDetailPageView14d,attributedOrdersNewToBrand14d,attributedSales14d,attributedSales14dSameSKU,attributedSales1d,attributedSales1dSameSKU,attributedSales30d,attributedSales30dSameSKU,attributedSales7d,attributedSales7dSameSKU,attributedSalesNewToBrand14d,attributedUnitsOrdered14d,attributedUnitsOrdered1d,attributedUnitsOrdered30d,attributedUnitsOrdered7d,attributedUnitsOrderedNewToBrand14d,campaignId,campaignName,clicks,cost,currency,impressions,targetId,targetingExpression,targetingText,targetingType,viewAttributedConversions14d,viewAttributedDetailPageView14d,viewAttributedSales14d,viewAttributedUnitsOrdered14d,viewAttributedOrdersNewToBrand14d,viewAttributedSalesNewToBrand14d,viewAttributedUnitsOrderedNewToBrand14d';
         }
 
