@@ -52,6 +52,7 @@ class CurlRequest
     public function close()
     {
         curl_close($this->handle);
+        unset($this->handle); // custom code - in PHP8 curl_close does nothing, you need to destroy the object instead
     }
 
     private function _handleHeaderLine($ch, $line)
