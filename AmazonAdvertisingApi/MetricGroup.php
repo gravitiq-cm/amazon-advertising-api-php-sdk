@@ -91,7 +91,7 @@ class MetricGroup
         } elseif (self::SEARCH_TERM_KEYWORD_SBRAND_ALL === $groupName) {
             return 'adGroupId,adGroupName,attributedConversions14d,attributedSales14d,campaignBudget,campaignBudgetType,campaignId,campaignName,campaignStatus,clicks,cost,impressions,keywordBid,keywordStatus,keywordText,matchType,searchTermImpressionRank,searchTermImpressionShare';
         } elseif (self::SEARCH_TERM_KEYWORD_SBVIDEO_ALL === $groupName) {
-            return 'adGroupId,adGroupName,attributedConversions14d,attributedSales14d,campaignBudget,campaignBudgetType,campaignStatus,clicks,cost,impressions,keywordBid,keywordStatus,keywordText,matchType,vctr,video5SecondViewRate,video5SecondViews,videoCompleteViews,videoFirstQuartileViews,videoMidpointViews,videoThirdQuartileViews,videoUnmutes,viewableImpressions,vtr';
+            return 'adGroupId,adGroupName,attributedConversions14d,attributedSales14d,campaignBudget,campaignBudgetType,campaignStatus,clicks,cost,impressions,keywordBid,keywordStatus,keywordText,matchType,vctr,video5SecondViewRate,video5SecondViews,videoCompleteViews,videoFirstQuartileViews,videoMidpointViews,videoThirdQuartileViews,videoUnmutes,viewableImpressions,vtr,dpv14d';
         } elseif (self::SEARCH_TERM_KEYWORD_SPRODUCT_ALL === $groupName) {
             return 'adGroupId,adGroupName,attributedConversions14d,attributedConversions14dSameSKU,attributedConversions1d,attributedConversions1dSameSKU,attributedConversions30d,attributedConversions30dSameSKU,attributedConversions7d,attributedConversions7dSameSKU,attributedSales14d,attributedSales14dSameSKU,attributedSales1d,attributedSales1dSameSKU,attributedSales30d,attributedSales30dSameSKU,attributedSales7d,attributedSales7dSameSKU,attributedUnitsOrdered14d,attributedUnitsOrdered14dSameSKU,attributedUnitsOrdered1d,attributedUnitsOrdered1dSameSKU,attributedUnitsOrdered30d,attributedUnitsOrdered30dSameSKU,attributedUnitsOrdered7d,attributedUnitsOrdered7dSameSKU,campaignBudget,campaignBudgetType,campaignId,campaignName,campaignStatus,clicks,cost,currency,impressions,keywordStatus,keywordText,matchType';
         } elseif (self::SEARCH_TERM_TARGET_SPRODUCT_ALL === $groupName) {
@@ -118,8 +118,16 @@ class MetricGroup
     /**
      * @throws \InvalidArgumentException
      */
-    public static function buildReportDataArrayFromMetricGroup($groupName, $dataArray=[]) {
+    public static function buildReportDataArrayFromMetricGroup($groupName, $dataArray=[], $isVendorProfile=false) {
         $dataArray['metrics'] = self::getMetricGroup($groupName);
+        if ($isVendorProfile) {
+            // Remove fields which are NOT for vendors
+            $dataArray['metrics'] = str_replace(',sku,', ',', $dataArray['metrics']);
+        } else {
+            // Remove fields which are ONLY for vendors
+            $dataArray['metrics'] = str_replace(',dpv14d,', ',', $dataArray['metrics']);
+            $dataArray['metrics'] = str_replace(',unitsSold14d,', ',', $dataArray['metrics']);
+        }
         return $dataArray;
     }
 }
