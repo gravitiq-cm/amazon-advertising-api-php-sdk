@@ -20,4 +20,23 @@ class Regions
             "tokenUrl" => "api.amazon.co.jp/auth/o2/token"
         ),
     );
+
+    public const SD_AVAILABLE_IN_MARKETPLACES = [
+        'US', 'CA', 'MX',
+        'UK', 'DE', 'FR', 'IT', 'ES',
+        'AE',
+        'AU',
+        'BR',
+        'IN',
+        'JP',
+        'NL',
+    ];
+
+    public static function isSponsoredDisplayAvailableInMarketplace($marketplace): bool
+    {
+        if (in_array($marketplace, self::SD_AVAILABLE_IN_MARKETPLACES)) {
+            return true;
+        }
+        return false;
+    }
 }
