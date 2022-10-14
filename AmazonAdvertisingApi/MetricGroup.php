@@ -5,6 +5,7 @@ namespace AmazonAdvertisingApi;
 class MetricGroup
 {
     const CAMPAIGN_SPRODUCT_ALL                 = 'c_sp_all';
+    const CAMPAIGN_SPRODUCT_ALLV3               = 'c_sp_all_v3';
     const CAMPAIGN_SBRAND_ALL                   = 'c_sb_all';
     const CAMPAIGN_SBVIDEO_ALL                  = 'c_sbv_all';
     const CAMPAIGN_SDISPLAY_ALL                 = 'c_sd_all';
@@ -47,9 +48,10 @@ class MetricGroup
         if ($strictMode && strpos($groupName, ',') !== false) {
             return $groupName; // assume it's an arbitrary strings of metrics
         }
-
         if (self::CAMPAIGN_SPRODUCT_ALL === $groupName) {
             return 'applicableBudgetRuleId,applicableBudgetRuleName,attributedConversions14d,attributedConversions14dSameSKU,attributedConversions1d,attributedConversions1dSameSKU,attributedConversions30d,attributedConversions30dSameSKU,attributedConversions7d,attributedConversions7dSameSKU,attributedSales14d,attributedSales14dSameSKU,attributedSales1d,attributedSales1dSameSKU,attributedSales30d,attributedSales30dSameSKU,attributedSales7d,attributedSales7dSameSKU,attributedUnitsOrdered14d,attributedUnitsOrdered14dSameSKU,attributedUnitsOrdered1d,attributedUnitsOrdered1dSameSKU,attributedUnitsOrdered30d,attributedUnitsOrdered30dSameSKU,attributedUnitsOrdered7d,attributedUnitsOrdered7dSameSKU,campaignBudget,campaignBudgetType,campaignName,campaignRuleBasedBudget,campaignStatus,clicks,cost,currency,impressions';
+        } elseif (self::CAMPAIGN_SPRODUCT_ALLV3 === $groupName) {
+            return 'adGroupId,adGroupName,adStatus,attributedSalesSameSku1d,attributedSalesSameSku7d,attributedSalesSameSku14d,attributedSalesSameSku30d,campaignApplicableBudgetRuleId,campaignApplicableBudgetRuleName,campaignBiddingStrategy,campaignBudgetAmount,campaignBudgetCurrencyCode,campaignBudgetType,campaignId,campaignName,campaignRuleBasedBudgetAmount,campaignStatus,clicks,cost,impressions,purchases1d,purchases7d,purchases14d,purchases30d,purchasesSameSku1d,purchasesSameSku7d,purchasesSameSku14d,purchasesSameSku30d,sales1d,sales7d,sales14d,sales30d,date,unitsSoldClicks1d,unitsSoldClicks7d,unitsSoldClicks14d,unitsSoldClicks30d,unitsSoldSameSku1d,unitsSoldSameSku7d,unitsSoldSameSku14d,unitsSoldSameSku30d';
         } elseif (self::CAMPAIGN_SBRAND_ALL === $groupName) {
             return 'applicableBudgetRuleId,applicableBudgetRuleName,attributedConversions14d,attributedConversions14dSameSKU,attributedDetailPageViewsClicks14d,attributedOrderRateNewToBrand14d,attributedOrdersNewToBrand14d,attributedOrdersNewToBrandPercentage14d,attributedSales14d,attributedSales14dSameSKU,attributedSalesNewToBrand14d,attributedSalesNewToBrandPercentage14d,attributedUnitsOrderedNewToBrand14d,attributedUnitsOrderedNewToBrandPercentage14d,campaignBudget,campaignBudgetType,campaignName,campaignRuleBasedBudget,campaignStatus,clicks,cost,dpv14d,impressions,unitsSold14d';
         } elseif (self::CAMPAIGN_SBVIDEO_ALL === $groupName) {
@@ -128,6 +130,22 @@ class MetricGroup
             $dataArray['metrics'] = str_replace(',dpv14d,', ',', $dataArray['metrics']);
             $dataArray['metrics'] = str_replace(',unitsSold14d,', ',', $dataArray['metrics']);
         }
+        return $dataArray;
+    }
+
+    /**
+     * @throws \InvalidArgumentException
+     */
+    public static function buildV3ReportDataArrayFromMetricGroup($groupName, $dataArray=[], $isVendorProfile=false) {
+        $dataArray['columns'] = self::getMetricGroup($groupName);
+        if ($isVendorProfile) {
+            // Remove fields which are NOT for vendors
+            $dataArray['columns'] = str_replace(',advertisedSku,', ',', $dataArray['columns']);
+        } else {
+            // Remove fields which are ONLY for vendors
+            $dataArray['columns'] = str_replace(',unitsSold14d,', ',', $dataArray['columns']);
+        }
+        $dataArray['columns'] = explode(',', $dataArray['columns']);
         return $dataArray;
     }
 }

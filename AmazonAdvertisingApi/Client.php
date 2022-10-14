@@ -8,6 +8,8 @@ require_once "CurlRequest.php";
 
 class Client
 {
+    private const INTERFACE_REPORTS_V3 = 'reporting/reports';
+
     private $config = [
         "clientId" => null,
         "clientSecret" => null,
@@ -617,6 +619,15 @@ class Client
     }
 
 
+    public function requestReportV3($recordType, $data = null)
+    {
+        return $this->_operation(self::INTERFACE_REPORTS_V3, $data, "POST");
+    }
+    public function getReportStatusV3($reportId)
+    {
+        return $this->_operation(self::INTERFACE_REPORTS_V3 . '/' . $reportId);
+    }
+
     public function requestReport($recordType, $data = null)
     {
         return $this->_operation("sp/{$recordType}/report", $data, "POST");
@@ -959,9 +970,14 @@ class Client
 
     private function _operation($interface, $params = [], $method = "GET", $additionalHeaders = [])
     {
+        if (self::INTERFACE_REPORTS_V3 === $interface) {
+            $contentType = 'application/vnd.createasyncreportrequest.v3+json';
+        } else {
+            $contentType = 'application/json';
+        }
         $headers = [
             "Authorization: bearer {$this->config["accessToken"]}",
-            "Content-Type: application/json",
+            "Content-Type: $contentType",
             "User-Agent: {$this->userAgent}"
         ];
 
@@ -980,8 +996,10 @@ class Client
         $request = new CurlRequest();
         $url = "{$this->endpoint}/{$interface}";
 
-        $excludedVersionForInterfaceList = ['brands', 'stores/assets', 'sb/campaigns', 'sb/targets', 'sb/keywords'];
+        $excludedVersionForInterfaceList = ['brands', 'stores/assets', 'sb/campaigns', 'sb/targets', 'sb/keywords', self::INTERFACE_REPORTS_V3];
         if (array_search($interface, $excludedVersionForInterfaceList) !== false) {
+            $url = str_replace('/' . $this->apiVersion, '', $url);
+        } elseif (str_contains($url, $this->apiVersion . '/' . self::INTERFACE_REPORTS_V3)) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
         }
 
