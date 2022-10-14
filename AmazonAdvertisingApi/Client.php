@@ -644,13 +644,13 @@ class Client
         return $this->_operation("sp/targets/report", $data, "POST");
     }
 
-    public function getReport($reportId)
+    public function getReport($reportId, bool $gunzipResponse=true)
     {
         $req = $this->_operation("reports/{$reportId}");
         if ($req["success"]) {
             $json = json_decode($req["response"], true);
             if ($json["status"] == "SUCCESS") {
-                return $this->_download($json["location"]);
+                return $this->_download($json["location"], false, $gunzipResponse);
             }
         }
         return $req;
@@ -917,11 +917,11 @@ class Client
         return $this->_UploadAsset($data, [$filePath], $headers, $imageType, $fileName);
     }
 
-    private function _download($location, $gunzip = false)
+    private function _download($location, $downloadActualFile = false, bool $gunzipResponse=true)
     {
         $headers = [];
 
-        if (!$gunzip) {
+        if (!$downloadActualFile) {
             /* only send authorization header when not downloading actual file */
             array_push($headers, "Authorization: bearer {$this->config["accessToken"]}");
         }
@@ -939,17 +939,22 @@ class Client
         $request->setOption(CURLOPT_HTTPHEADER, $headers);
         $request->setOption(CURLOPT_USERAGENT, $this->userAgent);
 
-        if ($gunzip) {
-            $response = $this->_executeRequest($request);
-            try {
-                $response["response"] = gzdecode($response["response"]);
-            } catch (\Exception $e) {
+        if ($downloadActualFile) {
+            $response = $this->_executeRequest($request, $gunzipResponse);
+            if ($gunzipResponse) {
+                try {
+                    $response["response"] = gzdecode($response["response"]);
+                    $response["gzencoded"] = 0;
+                } catch (\Exception $e) {
 
+                }
+            } else {
+                $response["gzencoded"] = 1;
             }
             return $response;
         }
 
-        return $this->_executeRequest($request);
+        return $this->_executeRequest($request, $gunzipResponse);
     }
 
     private function _operation($interface, $params = [], $method = "GET", $additionalHeaders = [])
@@ -1135,7 +1140,7 @@ class Client
     }
 
 
-    protected function _executeRequest($request)
+    protected function _executeRequest($request, bool $gunzipResponse=true)
     {
         $response = $request->execute();
         $this->requestId = $request->requestId;
@@ -1145,7 +1150,7 @@ class Client
 
         if ($response_info["http_code"] == 307) {
             /* application/octet-stream */
-            return $this->_download($response_info["redirect_url"], true);
+            return $this->_download($response_info["redirect_url"], true, $gunzipResponse);
         }
 
         if (!preg_match("/^([23])\d{2}$/", $response_info["http_code"])) {
