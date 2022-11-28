@@ -78,7 +78,9 @@ class Client
         $response = $this->_makeCurlTokenRequest($params);
 
         $response_array = json_decode($response["response"], true);
-        if (array_key_exists("access_token", $response_array)) {
+        if (!is_array($response_array)) {
+            $this->_logAndThrow("Response expected to be JSON->array, but instead got: " . (is_null($response) ? 'NULL' : $response));
+        } elseif (array_key_exists("access_token", $response_array)) {
             $this->config["accessToken"] = $response_array["access_token"];
         } else {
             $this->_logAndThrow("Unable to refresh token. 'access_token' not found in response. " . print_r($response, true));
