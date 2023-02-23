@@ -48,7 +48,13 @@ class MetricGroup
     const MATCHED_TARGET_TARGETS_SDISPLAY_ALL   = 'mt_tar_sd_all';
 
 
-    const PRODUCT_AD_SP_ALL = 'pa_sp_all';
+    const PRODUCT_AD_SP_ALL                     = 'pa_sp_all';
+
+    // Attribution Reports
+    const AD_GROUP_ATTR_PRODUCT_ALLV3           = 'ag_attrp_all_v3';
+    const AD_GROUP_ATTR_PERFORMANCE_ALLV3       = 'ag_attrf_all_v3';
+    const CAMPAIGN_ATTR_PERFORMANCE_ALLV3       = 'c_attrf_all_v3';
+    const CREATIVE_ATTR_PERFORMANCE_ALLV3       = 'cr_attrf_all_v3';
 
     /**
      * @throws \Exception
@@ -134,6 +140,14 @@ class MetricGroup
             return 'adGroupId,adGroupName,attributedConversions14d,attributedConversions14dSameSKU,attributedConversions1d,attributedConversions1dSameSKU,attributedConversions30d,attributedConversions30dSameSKU,attributedConversions7d,attributedConversions7dSameSKU,attributedDetailPageView14d,attributedOrdersNewToBrand14d,attributedSales14d,attributedSales14dSameSKU,attributedSales1d,attributedSales1dSameSKU,attributedSales30d,attributedSales30dSameSKU,attributedSales7dSameSKU,attributedUnitsOrdered14d,attributedUnitsOrdered1d,attributedUnitsOrdered30d,attributedUnitsOrdered7d,attributedUnitsOrderedNewToBrand14d,bidOptimization,campaignId,campaignName,clicks,cost,currency,impressions,viewAttributedConversions14d,viewAttributedDetailPageView14d,viewAttributedSales14d,viewAttributedUnitsOrdered14d,viewImpressions,viewAttributedOrdersNewToBrand14d,viewAttributedSalesNewToBrand14d,viewAttributedUnitsOrderedNewToBrand14d,attributedBrandedSearches14d,viewAttributedBrandedSearches14d';
         } elseif (self::MATCHED_TARGET_TARGETS_SDISPLAY_ALL === $groupName) {
             return 'adGroupId,adGroupName,attributedConversions14d,attributedConversions14dSameSKU,attributedConversions1d,attributedConversions1dSameSKU,attributedConversions30d,attributedConversions30dSameSKU,attributedConversions7d,attributedConversions7dSameSKU,attributedDetailPageView14d,attributedOrdersNewToBrand14d,attributedSales14d,attributedSales14dSameSKU,attributedSales1d,attributedSales1dSameSKU,attributedSales30d,attributedSales30dSameSKU,attributedSales7d,attributedSales7dSameSKU,attributedSalesNewToBrand14d,attributedUnitsOrdered14d,attributedUnitsOrdered1d,attributedUnitsOrdered30d,attributedUnitsOrdered7d,attributedUnitsOrderedNewToBrand14d,campaignId,campaignName,clicks,cost,currency,impressions,targetId,targetingExpression,targetingText,targetingType,viewAttributedConversions14d,viewAttributedDetailPageView14d,viewAttributedSales14d,viewAttributedUnitsOrdered14d,viewAttributedOrdersNewToBrand14d,viewAttributedSalesNewToBrand14d,viewAttributedUnitsOrderedNewToBrand14d,attributedBrandedSearches14d,viewAttributedBrandedSearches14d';
+        } elseif (str_ends_with($groupName, '_attrp_all_v3')) {
+            return 'attributedDetailPageViewsClicks14d,attributedAddToCartClicks14d,attributedPurchases14d,unitsSold14d,attributedSales14d,brandHaloDetailPageViewsClicks14d,brandHaloAttributedAddToCartClicks14d,brandHaloAttributedPurchases14d,brandHaloUnitsSold14d,brandHaloAttributedSales14d,attributedNewToBrandPurchases14d,attributedNewToBrandUnitsSold14d,attributedNewToBrandSales14d,brandHaloNewToBrandPurchases14d,brandHaloNewToBrandUnitsSold14d,brandHaloNewToBrandSales14d';
+        } elseif (str_ends_with($groupName, '_attrf_all_v3')) {
+            $metricList = 'Click-throughs,attributedDetailPageViewsClicks14d,attributedAddToCartClicks14d,attributedPurchases14d,unitsSold14d,attributedSales14d,attributedTotalDetailPageViewsClicks14d,attributedTotalAddToCartClicks14d,attributedTotalPurchases14d,totalUnitsSold14d,totalAttributedSales14d';
+            if (self::CREATIVE_ATTR_PERFORMANCE_ALLV3 != $groupName) {
+                $metricList .= ',brb_bonus_amount';
+            }
+            return $metricList;
         }
 
         throw new \InvalidArgumentException("$groupName is not a recognised Metric Group");
