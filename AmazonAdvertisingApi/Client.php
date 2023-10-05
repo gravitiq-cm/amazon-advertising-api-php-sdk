@@ -856,6 +856,15 @@ class Client
         return $this->_operation("history", $data, "POST");
     }
 
+    /** Amazon Ad Creatives Start  */
+
+    public function getAdCreatives($data = null)
+    {
+        return $this->_operation("sb/ads/creatives/list", $data, "POST");
+    }
+
+    /** Amazon Ad Creatives End  */
+
     /**
      * @param $data
      *  [        'assetInfo' => '{brandEntityId: "ENTITY123456", mediaType: "brandLogo"}'    ];
