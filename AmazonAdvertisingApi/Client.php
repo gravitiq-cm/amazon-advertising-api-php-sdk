@@ -35,6 +35,9 @@ class Client
     https://advertising.amazon.com/API/docs/en-us/amazon-attribution-prod-3p/#/Advertisers
     */
     public $profileIdAttribution = null;
+    private const ROUTE_ACCEPT_TYPE_MAPPING = [
+        'sb/ads/creatives/list' => 'application/vnd.sbAdCreativeResource.v4+json'
+    ];
 
     /**
      * @throws \Exception
@@ -913,6 +916,15 @@ class Client
         return $this->_operation("history", $data, "POST");
     }
 
+    /** Amazon Ad Creatives Start  */
+
+    public function listSbAdCreatives($data = null)
+    {
+        return $this->_operation("sb/ads/creatives/list", $data, "POST");
+    }
+
+    /** Amazon Ad Creatives End  */
+
     /**
      * @param $data
      *  [        'assetInfo' => '{brandEntityId: "ENTITY123456", mediaType: "brandLogo"}'    ];
@@ -974,20 +986,26 @@ class Client
     {
         if (self::INTERFACE_REPORTS_V3 === $interface) {
             $contentType = 'application/vnd.createasyncreportrequest.v3+json';
+        } elseif (isset(self::ROUTE_ACCEPT_TYPE_MAPPING[$interface])) {
+            $contentType = 'text/plain';
+            $acceptType = self::ROUTE_ACCEPT_TYPE_MAPPING[$interface];
         } else {
             $contentType = 'application/json';
         }
+
         $headers = [
             "Authorization: bearer {$this->config["accessToken"]}",
             "Content-Type: $contentType",
-            "User-Agent: {$this->userAgent}"
+            "User-Agent: {$this->userAgent}",
         ];
 
+        if (!empty($acceptType)) {
+            $headers[] = "Accept: $acceptType";
+        }
 
         if (!is_null($this->config['clientId'])) {
             array_push($headers, "Amazon-Advertising-API-ClientId: {$this->config['clientId']}");
         }
-
 
         if (!empty($additionalHeaders)) {
             foreach ($additionalHeaders as $header) {
@@ -1002,6 +1020,8 @@ class Client
         if (array_search($interface, $excludedVersionForInterfaceList) !== false) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
         } elseif (str_contains($url, $this->apiVersion . '/' . self::INTERFACE_REPORTS_V3)) {
+            $url = str_replace('/' . $this->apiVersion, '', $url);
+        } elseif (strpos($url, 'sb/ads') !== false) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
         }
 
@@ -1051,7 +1071,6 @@ class Client
         $request->setOption(CURLOPT_CUSTOMREQUEST, strtoupper($method));
         return $this->_executeRequest($request);
     }
-
 
     /**
      * @param array $params
