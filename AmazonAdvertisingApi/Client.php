@@ -925,6 +925,43 @@ class Client
 
     /** Amazon Ad Creatives End  */
 
+    public function requestBrandMetrics($data = null)
+    {
+        return $this->_operation("insights/brandMetrics/report", $data, "POST");
+    }
+
+    public function getBrandMetricsReport($reportId, bool $gunzipResponse=true)
+    {
+        $req = $this->_operation("insights/brandMetrics/report/{$reportId}");
+        if ($req["success"]) {
+            $json = json_decode($req["response"], true);
+            if ($json["status"] == "SUCCESSFUL") {
+                $requestId = $this->requestId;
+                try {
+                    $response = file_get_contents($json["location"]);
+                    return [
+                        "success" => true,
+                        "response" => $response,
+                        "requestId" => $requestId
+                    ];
+                } catch (\Exception $e) {
+                    return [
+                        "success" => false,
+                        "response" => $e->getMessage(),
+                        "requestId" => $requestId
+                    ];
+                }
+            }
+        }
+        return $req;
+    }
+
+    public function getBrandMetricsReportStatus($reportId)
+    {
+        $req = $this->_operation("insights/brandMetrics/report/{$reportId}");
+        return $req;
+    }
+
     /**
      * @param $data
      *  [        'assetInfo' => '{brandEntityId: "ENTITY123456", mediaType: "brandLogo"}'    ];
@@ -1022,6 +1059,8 @@ class Client
         } elseif (str_contains($url, $this->apiVersion . '/' . self::INTERFACE_REPORTS_V3)) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
         } elseif (strpos($url, 'sb/ads') !== false) {
+            $url = str_replace('/' . $this->apiVersion, '', $url);
+        } elseif (strpos($url, 'insights/brandMetrics') !== false) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
         }
 
