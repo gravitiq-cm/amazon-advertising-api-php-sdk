@@ -944,7 +944,15 @@ class Client
                         "response" => $response,
                         "requestId" => $requestId
                     ];
-                } catch (\Exception $e) {
+                } catch (\Exception|\ValueError $e) {
+                    if ('Path cannot be empty' === $e->getMessage()) {
+                        // Happens when the report is empty
+                        return [
+                            "success" => true,
+                            "response" => '{}',
+                            "requestId" => $requestId
+                        ];
+                    }
                     return [
                         "success" => false,
                         "response" => $e->getMessage(),
