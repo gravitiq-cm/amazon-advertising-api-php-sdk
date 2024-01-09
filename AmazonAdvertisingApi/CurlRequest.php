@@ -5,6 +5,7 @@ namespace AmazonAdvertisingApi;
 class CurlRequest
 {
     private $handle = null;
+    public array $responseHeaders = [];
     public $requestId = null;
     private $optionsArray = array();
 
@@ -57,6 +58,8 @@ class CurlRequest
 
     private function _handleHeaderLine($ch, $line)
     {
+        $this->addResponseHeaderToRequestObject($line);
+
         $matches = array();
         if (preg_match("/x-amz-request-id:\ \S+/", $line)) {
             preg_match_all("/[^\ ]\S+/", $line, $matches);
@@ -67,6 +70,31 @@ class CurlRequest
             }
         }
         return strlen($line);
+    }
+
+    /**
+     * @param string $headers
+     */
+    private function addResponseHeaderToRequestObject(string $headers): void
+    {
+        $convertedLine = array();
+        $matches = array();
+        if (preg_match("/[^:\n]+: [^\n]+/", $headers)) {
+            preg_match_all("/[^:\n]+: [^\n]+/", $headers, $matches);
+            if (count($matches) > 0) {
+                if (count($matches[0]) > 0) {
+                    foreach ($matches[0] as $match) {
+                        $parts = explode(":", $match);
+                        if (count($parts) > 1) {
+                            $key = trim($parts[0]);
+                            $value = trim($parts[1]);
+                            $convertedLine[$key] = $value;
+                        }
+                    }
+                }
+            }
+        }
+        $this->responseHeaders = array_merge($this->responseHeaders, $convertedLine);
     }
 
     public function getOptionsArray(){

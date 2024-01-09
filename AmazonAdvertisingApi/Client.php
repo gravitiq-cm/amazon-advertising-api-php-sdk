@@ -1256,7 +1256,8 @@ class Client
             "success" => $success,
             "code" => $response_info["http_code"],
             "response" => $response,
-            "requestId" => $requestId
+            "requestId" => $requestId,
+            "responseHeaders" => $request->responseHeaders,
         ];
     }
 
