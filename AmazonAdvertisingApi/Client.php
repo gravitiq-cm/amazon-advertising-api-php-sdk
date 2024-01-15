@@ -828,11 +828,6 @@ class Client
         return $this->_operation("sp/targets/bidRecommendations", $data, "POST");
     }
 
-    public function getTargetKeywordRecommendations($data)
-    {
-        return $this->_operation("sp/targets/keywords/recommendations", $data, "POST");
-    }
-
     public function listPortfolios($data = null)
     {
         return $this->_operation("portfolios", $data);
@@ -1039,8 +1034,6 @@ class Client
         } elseif (isset(self::ROUTE_ACCEPT_TYPE_MAPPING[$interface])) {
             $contentType = 'text/plain';
             $acceptType = self::ROUTE_ACCEPT_TYPE_MAPPING[$interface];
-        } elseif ($interface === 'sp/targets/keywords/recommendations') {
-            $contentType = 'application/vnd.spkeywordsrecommendation.v3+json';
         } else {
             $contentType = 'application/json';
         }
@@ -1076,8 +1069,6 @@ class Client
         } elseif (strpos($url, 'sb/ads') !== false) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
         } elseif (strpos($url, 'insights/brandMetrics') !== false) {
-            $url = str_replace('/' . $this->apiVersion, '', $url);
-        } elseif (strpos($url, 'sp/targets/keywords') !== false) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
         }
 
