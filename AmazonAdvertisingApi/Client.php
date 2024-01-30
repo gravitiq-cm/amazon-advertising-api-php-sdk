@@ -1040,7 +1040,7 @@ class Client
             $contentType = 'text/plain';
             $acceptType = self::ROUTE_ACCEPT_TYPE_MAPPING[$interface];
         } elseif ($interface === 'sp/targets/keywords/recommendations') {
-            $contentType = 'application/vnd.spkeywordsrecommendation.v3+json';
+            $contentType = 'application/vnd.spkeywordsrecommendation.v5+json';
         } else {
             $contentType = 'application/json';
         }
