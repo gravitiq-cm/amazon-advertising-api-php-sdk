@@ -7,6 +7,7 @@ class MetricGroup
     const CAMPAIGN_SPRODUCT_ALL                 = 'c_sp_all';
     const CAMPAIGN_SPRODUCT_ALLV3               = 'c_sp_all_v3';
     const CAMPAIGN_SBRAND_ALL                   = 'c_sb_all';
+    const CAMPAIGN_SBRAND_ALLV3                 = 'c_sb_all_v3';
     const CAMPAIGN_SBVIDEO_ALL                  = 'c_sbv_all';
     const CAMPAIGN_SDISPLAY_ALL                 = 'c_sd_all';
     const PLACEMENT_SPRODUCT_ALL                = 'pl_sp_all';
@@ -61,7 +62,7 @@ class MetricGroup
     /**
      * @throws \InvalidArgumentException
      */
-    public static function getMetricGroup($groupName, $strictMode=false)
+    public static function getMetricGroup(string $groupName, bool $strictMode=false): string
     {
         if ($strictMode && str_contains($groupName, ',')) {
             return $groupName; // assume it's an arbitrary strings of metrics
@@ -72,6 +73,9 @@ class MetricGroup
             return 'attributedSalesSameSku1d,attributedSalesSameSku7d,attributedSalesSameSku14d,attributedSalesSameSku30d,campaignApplicableBudgetRuleId,campaignApplicableBudgetRuleName,campaignBiddingStrategy,campaignBudgetAmount,campaignBudgetCurrencyCode,campaignBudgetType,campaignId,campaignName,campaignRuleBasedBudgetAmount,campaignStatus,clicks,cost,impressions,purchases1d,purchases7d,purchases14d,purchases30d,purchasesSameSku1d,purchasesSameSku7d,purchasesSameSku14d,purchasesSameSku30d,sales1d,sales7d,sales14d,sales30d,date,unitsSoldClicks1d,unitsSoldClicks7d,unitsSoldClicks14d,unitsSoldClicks30d,unitsSoldSameSku1d,unitsSoldSameSku7d,unitsSoldSameSku14d,unitsSoldSameSku30d,topOfSearchImpressionShare';
         } elseif (self::CAMPAIGN_SBRAND_ALL === $groupName) {
             return 'applicableBudgetRuleId,applicableBudgetRuleName,attributedConversions14d,attributedConversions14dSameSKU,attributedDetailPageViewsClicks14d,attributedOrderRateNewToBrand14d,attributedOrdersNewToBrand14d,attributedOrdersNewToBrandPercentage14d,attributedSales14d,attributedSales14dSameSKU,attributedSalesNewToBrand14d,attributedSalesNewToBrandPercentage14d,attributedUnitsOrderedNewToBrand14d,attributedUnitsOrderedNewToBrandPercentage14d,campaignBudget,campaignBudgetType,campaignName,campaignRuleBasedBudget,campaignStatus,clicks,cost,dpv14d,impressions,unitsSold14d,attributedBrandedSearches14d,topOfSearchImpressionShare';
+        } elseif (self::CAMPAIGN_SBRAND_ALLV3 === $groupName) {
+            // Note: do not want startDate and endDate in the list - they cause errors with DAILY reports
+            return 'addToCart,addToCartClicks,addToCartRate,brandedSearches,brandedSearchesClicks,campaignBudgetAmount,campaignBudgetCurrencyCode,campaignBudgetType,campaignId,campaignName,campaignStatus,clicks,cost,costType,date,detailPageViews,detailPageViewsClicks,eCPAddToCart,impressions,newToBrandDetailPageViewRate,newToBrandDetailPageViews,newToBrandDetailPageViewsClicks,newToBrandECPDetailPageView,newToBrandPurchases,newToBrandPurchasesClicks,newToBrandPurchasesPercentage,newToBrandPurchasesRate,newToBrandSales,newToBrandSalesClicks,newToBrandSalesPercentage,newToBrandUnitsSold,newToBrandUnitsSoldClicks,newToBrandUnitsSoldPercentage,purchases,purchasesClicks,purchasesPromoted,sales,salesClicks,salesPromoted,topOfSearchImpressionShare,unitsSold,unitsSoldClicks,video5SecondViewRate,video5SecondViews,videoCompleteViews,videoFirstQuartileViews,videoMidpointViews,videoThirdQuartileViews,videoUnmutes,viewabilityRate,viewableImpressions,viewClickThroughRate';
         } elseif (self::CAMPAIGN_SBVIDEO_ALL === $groupName) {
             return 'attributedConversions14d,attributedConversions14dSameSKU,attributedSales14d,attributedSales14dSameSKU,campaignBudget,campaignBudgetType,campaignName,campaignStatus,clicks,cost,dpv14d,impressions,vctr,video5SecondViewRate,video5SecondViews,videoCompleteViews,videoFirstQuartileViews,videoMidpointViews,videoThirdQuartileViews,videoUnmutes,viewableImpressions,vtr,attributedDetailPageViewsClicks14d,attributedOrderRateNewToBrand14d,attributedOrdersNewToBrand14d,attributedOrdersNewToBrandPercentage14d,attributedSalesNewToBrand14d,attributedSalesNewToBrandPercentage14d,attributedUnitsOrderedNewToBrand14d,attributedUnitsOrderedNewToBrandPercentage14d,attributedBrandedSearches14d,currency,topOfSearchImpressionShare';
         } elseif (self::CAMPAIGN_SDISPLAY_ALL === $groupName) {
@@ -162,9 +166,13 @@ class MetricGroup
     }
 
     /**
+     * @param string $groupName
+     * @param array<string, mixed> $dataArray
+     * @param bool $isVendorProfile
+     * @return array<string, mixed>
      * @throws \InvalidArgumentException
      */
-    public static function buildReportDataArrayFromMetricGroup($groupName, $dataArray=[], $isVendorProfile=false) {
+    public static function buildReportDataArrayFromMetricGroup(string $groupName, array $dataArray=[], bool $isVendorProfile=false) {
         $dataArray['metrics'] = self::getMetricGroup($groupName);
         if ($isVendorProfile) {
             // Remove fields which are NOT for vendors
@@ -178,9 +186,14 @@ class MetricGroup
     }
 
     /**
+     * @param string $groupName
+     * @param array<string, mixed> $dataArray
+     * @param bool $isVendorProfile
+     * @return array<string, mixed>|mixed
+     *
      * @throws \InvalidArgumentException
      */
-    public static function buildV3ReportDataArrayFromMetricGroup($groupName, $dataArray=[], $isVendorProfile=false) {
+    public static function buildV3ReportDataArrayFromMetricGroup(string $groupName, array $dataArray=[], bool $isVendorProfile=false) {
         $dataArray['columns'] = self::getMetricGroup($groupName);
         if ($isVendorProfile) {
             // Remove fields which are NOT for vendors
