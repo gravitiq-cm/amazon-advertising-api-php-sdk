@@ -36,7 +36,8 @@ class Client
     */
     public $profileIdAttribution = null;
     private const ROUTE_ACCEPT_TYPE_MAPPING = [
-        'sb/ads/creatives/list' => 'application/vnd.sbAdCreativeResource.v4+json'
+        'sb/ads/creatives/list' => 'application/vnd.sbAdCreativeResource.v4+json',
+        'sb/v4/ads/list' => 'application/vnd.sbadresource.v4+json'
     ];
 
     /**
@@ -928,6 +929,11 @@ class Client
         return $this->_operation("sb/ads/creatives/list", $data, "POST");
     }
 
+    public function listSbAds($data = null)
+    {
+        return $this->_operation("sb/v4/ads/list", $data, "POST");
+    }
+
     /** Amazon Ad Creatives End  */
 
     public function requestBrandMetrics($data = null)
@@ -1073,7 +1079,7 @@ class Client
             $url = str_replace('/' . $this->apiVersion, '', $url);
         } elseif (str_contains($url, $this->apiVersion . '/' . self::INTERFACE_REPORTS_V3)) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
-        } elseif (strpos($url, 'sb/ads') !== false) {
+        } elseif (strpos($url, 'sb/ads') !== false || strpos($url, 'ads/list') !== false) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
         } elseif (strpos($url, 'insights/brandMetrics') !== false) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
