@@ -969,16 +969,16 @@ class Client
     /**
      * @param string $dataSetId
      * @param string $destinationArn
-     * @param string|null $clientRequestToken
      * @param string $notes
+     * @param string|null $clientRequestToken
      * @return array
      * @throws \Exception
      */
     public function amsCreateSubscriptionAssisted(
         string $dataSetId,
         string $destinationArn,
-        string $clientRequestToken = null,
-        string $notes = ''
+        string $notes = '',
+        string $clientRequestToken = null
     ): array
     {
         $data = [
@@ -1005,7 +1005,7 @@ class Client
             throw new \Exception('dataSetId and destinationArn are required');
         }
         if (empty($data['clientRequestToken'])) {
-            $data['clientRequestToken'] = uniqid();
+            $data['clientRequestToken'] = uniqid('gtq-sub', true);
         }
         return $this->_operation(self::INTERFACE_AMS, $data, 'POST');
     }
