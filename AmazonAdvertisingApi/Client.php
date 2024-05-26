@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnused - library class, can be called by external code */
 
 namespace AmazonAdvertisingApi;
 
@@ -9,8 +9,35 @@ require_once "CurlRequest.php";
 class Client
 {
     private const INTERFACE_REPORTS_V3 = 'reporting/reports';
+    private const INTERFACE_AMS = 'streams/subscriptions';
+    private const INTERFACE_SB_ADS_LIST = 'sb/v4/ads/list';
+    private const INTERFACE_SB_ADS_CREATIVES_LIST = 'sb/ads/creatives/list';
 
-    private $config = [
+    private const INTERFACES_THAT_DO_NOT_USE_API_VERSION = [
+        'brands', 'stores/assets', 'sb/campaigns', 'sb/targets', 'sb/keywords', self::INTERFACE_REPORTS_V3
+    ];
+    private const PARTIAL_URLS_THAT_DO_NOT_USE_API_VERSION = [
+        '/attribution' ,
+        'ads/list',
+        'history',
+        'insights/brandMetrics',
+        'sb/ads',
+        'sb/campaigns',
+        'sp/targets/keywords',
+        self::INTERFACE_AMS
+    ];
+
+    /**
+     * @var array{
+     *      clientId: mixed,
+     *      clientSecret: mixed,
+     *      region: mixed,
+     *      accessToken: mixed,
+     *      refreshToken: mixed,
+     *      sandbox: mixed,
+     *  } $config
+     */
+    private array $config = [
         "clientId" => null,
         "clientSecret" => null,
         "region" => null,
@@ -19,15 +46,17 @@ class Client
         "sandbox" => false,
     ];
 
-    private $apiVersion;
-    private $applicationVersion;
-    private $userAgent;
-    private $endpoint = null;
-    private $tokenUrl = null;
-    private $requestId = null;
-    private $endpoints;
-    private $versionStrings;
-    public $profileId = null;
+    private string $apiVersion;
+    private ?string $applicationVersion;
+    private ?string $userAgent;
+    private ?string $endpoint = null;
+    private ?string $tokenUrl = null;
+    private string|int|null $requestId = null;
+    /** @var array<string, array<string, string>> */
+    private array $endpoints;
+    /** @var array<string, string>  */
+    private array $versionStrings;
+    public ?string $profileId = null;
     /*
     Also note that Amazon Attribution accounts are a separate type of "profile". Only Amazon Attribution profiles can be
     called within the Amazon Attribution API. When getting the Profiles resource, identify the correct Amazon Attribution
@@ -36,8 +65,14 @@ class Client
     */
     public $profileIdAttribution = null;
     private const ROUTE_ACCEPT_TYPE_MAPPING = [
-        'sb/ads/creatives/list' => 'application/vnd.sbAdCreativeResource.v4+json',
-        'sb/v4/ads/list' => 'application/vnd.sbadresource.v4+json'
+        self::INTERFACE_AMS => 'application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json',
+        self::INTERFACE_SB_ADS_LIST => 'application/vnd.sbadresource.v4+json',
+        self::INTERFACE_SB_ADS_CREATIVES_LIST => 'application/vnd.sbAdCreativeResource.v4+json',
+    ];
+    private const ROUTE_CONTENT_TYPE_MAPPING = [
+        self::INTERFACE_AMS => ['PUT' => true, 'POST' => true],
+        self::INTERFACE_SB_ADS_LIST => 'text/plain',
+        self::INTERFACE_SB_ADS_CREATIVES_LIST => 'text/plain',
     ];
 
     /**
@@ -68,7 +103,7 @@ class Client
     /**
      * @throws \Exception
      */
-    public function doRefreshToken()
+    public function doRefreshToken(): array
     {
         $refresh_token = rawurldecode($this->config["refreshToken"]);
 
@@ -96,7 +131,7 @@ class Client
     /**
      * @throws \Exception
      */
-    public function convertAuthCodeToRefreshToken($authCode, $redirectUri)
+    public function convertAuthCodeToRefreshToken(string $authCode, string $redirectUri): array
     {
         $params = [
             "grant_type" => "authorization_code",
@@ -122,7 +157,8 @@ class Client
         ];
     }
 
-    private function _makeCurlTokenRequest($params) {
+    private function _makeCurlTokenRequest($params): array
+    {
         $headers = [
             "Content-Type: application/x-www-form-urlencoded;charset=UTF-8",
             "User-Agent: {$this->userAgent}"
@@ -145,417 +181,417 @@ class Client
         return $this->_executeRequest($request);
     }
 
-    public function listProfiles()
+    public function listProfiles(): array
     {
         return $this->_operation("profiles");
     }
 
-    public function registerProfile($data)
+    public function registerProfile($data): array
     {
         return $this->_operation("profiles/register", $data, "PUT");
     }
 
-    public function registerProfileStatus($profileId)
+    public function registerProfileStatus($profileId): array
     {
         return $this->_operation("profiles/register/{$profileId}/status");
     }
 
-    public function getProfile($profileId)
+    public function getProfile($profileId): array
     {
         return $this->_operation("profiles/{$profileId}");
     }
 
-    public function updateProfiles($data)
+    public function updateProfiles($data): array
     {
         return $this->_operation("profiles", $data, "PUT");
     }
 
-    public function getCampaign($campaignId)
+    public function getCampaign($campaignId): array
     {
         return $this->_operation("sp/campaigns/{$campaignId}");
     }
 
-    public function getCampaignEx($campaignId)
+    public function getCampaignEx($campaignId): array
     {
         return $this->_operation("sp/campaigns/extended/{$campaignId}");
     }
 
-    public function getCampaignExSponsoredDisplay($campaignId)
+    public function getCampaignExSponsoredDisplay($campaignId): array
     {
         return $this->_operation("sd/campaigns/extended/{$campaignId}");
     }
 
-    public function getCampaignExBrand($campaignId)
+    public function getCampaignExBrand($campaignId): array
     {
         return $this->_operation("sb/campaigns/extended/{$campaignId}");
     }
 
-    public function getCampaignSponsoredDisplay($campaignId)
+    public function getCampaignSponsoredDisplay($campaignId): array
     {
         return $this->_operation("sd/campaigns/{$campaignId}");
     }
 
-    public function createCampaigns($data)
+    public function createCampaigns($data): array
     {
         return $this->_operation("sp/campaigns", $data, "POST");
     }
 
-    public function createCampaignsBrand($data)
+    public function createCampaignsBrand($data): array
     {
         return $this->_operation("sb/campaigns", $data, "POST");
     }
 
-    public function createCampaignsSponsoredDisplay($data)
+    public function createCampaignsSponsoredDisplay($data): array
     {
         return $this->_operation("sd/campaigns", $data, "POST");
     }
 
-    public function updateCampaigns($data)
+    public function updateCampaigns($data): array
     {
         return $this->_operation("sp/campaigns", $data, "PUT");
     }
 
-    public function archiveCampaign($campaignId)
+    public function archiveCampaign($campaignId): array
     {
         return $this->_operation("sp/campaigns/{$campaignId}", null, "DELETE");
     }
 
-    public function archiveCampaignSponsoredDisplay($campaignId)
+    public function archiveCampaignSponsoredDisplay($campaignId): array
     {
         return $this->_operation("sd/campaigns/{$campaignId}", null, "DELETE");
     }
 
-    public function listCampaigns($data = null)
+    public function listCampaigns($data = null): array
     {
         return $this->_operation("sp/campaigns", $data);
     }
 
-    public function listCampaignsEx($data = null)
+    public function listCampaignsEx($data = null): array
     {
         return $this->_operation("sp/campaigns/extended", $data);
     }
 
-    public function listCampaignsExSponsoredDisplay($data = null)
+    public function listCampaignsExSponsoredDisplay($data = null): array
     {
         return $this->_operation("sd/campaigns/extended", $data);
     }
 
-    public function getCampaignBrand($campaignId)
+    public function getCampaignBrand($campaignId): array
     {
         return $this->_operation("sb/campaigns/{$campaignId}");
     }
 
-    public function updateCampaignsBrand($data)
+    public function updateCampaignsBrand($data): array
     {
         return $this->_operation("hsa/campaigns", $data, "PUT");
     }
 
-    public function updateCampaignsSponsoredDisplay($data)
+    public function updateCampaignsSponsoredDisplay($data): array
     {
         return $this->_operation("sd/campaigns", $data, "PUT");
     }
 
-    public function archiveCampaignBrand($campaignId)
+    public function archiveCampaignBrand($campaignId): array
     {
         return $this->_operation("hsa/campaigns/{$campaignId}", null, "DELETE");
     }
 
-    public function listCampaignsBrand($data = null)
+    public function listCampaignsBrand($data = null): array
     {
         return $this->_operation("hsa/campaigns", $data);
     }
 
-    public function listCampaignsSponsoredDisplay($data = null)
+    public function listCampaignsSponsoredDisplay($data = null): array
     {
         return $this->_operation("sd/campaigns", $data);
     }
 
-    public function getAdGroup($adGroupId)
+    public function getAdGroup($adGroupId): array
     {
         return $this->_operation("adGroups/{$adGroupId}");
     }
 
-    public function getAdGroupSponsoredDisplay($adGroupId)
+    public function getAdGroupSponsoredDisplay($adGroupId): array
     {
         return $this->_operation("sd/adGroups/{$adGroupId}");
     }
 
-    public function getAdGroupEx($adGroupId)
+    public function getAdGroupEx($adGroupId): array
     {
         return $this->_operation("adGroups/extended/{$adGroupId}");
     }
 
-    public function getAdGroupExSponsoredDisplay($adGroupId)
+    public function getAdGroupExSponsoredDisplay($adGroupId): array
     {
         return $this->_operation("sd/adGroups/extended/{$adGroupId}");
     }
 
-    public function createAdGroups($data)
+    public function createAdGroups($data): array
     {
         return $this->_operation("adGroups", $data, "POST");
     }
 
-    public function createAdGroupsSponsoredDisplay($data)
+    public function createAdGroupsSponsoredDisplay($data): array
     {
         return $this->_operation("sd/adGroups", $data, "POST");
     }
 
-    public function updateAdGroups($data)
+    public function updateAdGroups($data): array
     {
         return $this->_operation("adGroups", $data, "PUT");
     }
 
-    public function updateAdGroupsSponsoredDisplay($data)
+    public function updateAdGroupsSponsoredDisplay($data): array
     {
         return $this->_operation("sd/adGroups", $data, "PUT");
     }
 
-    public function archiveAdGroup($adGroupId)
+    public function archiveAdGroup($adGroupId): array
     {
         return $this->_operation("adGroups/{$adGroupId}", null, "DELETE");
     }
 
-    public function archiveAdGroupSponsoredDisplay($adGroupId)
+    public function archiveAdGroupSponsoredDisplay($adGroupId): array
     {
         return $this->_operation("sd/adGroups/{$adGroupId}", null, "DELETE");
     }
 
-    public function listAdGroups($data = null)
+    public function listAdGroups($data = null): array
     {
         return $this->_operation("adGroups", $data);
     }
 
-    public function listAdGroupsBrand($data = null)
+    public function listAdGroupsBrand($data = null): array
     {
         return $this->_operation("hsa/adGroups", $data);
     }
 
-    public function listAdGroupsSponsoredDisplay($data = null)
+    public function listAdGroupsSponsoredDisplay($data = null): array
     {
         return $this->_operation("sd/adGroups", $data);
     }
 
-    public function listAdGroupsEx($data = null)
+    public function listAdGroupsEx($data = null): array
     {
         return $this->_operation("adGroups/extended", $data);
     }
 
-    public function listAdGroupsExSponsoredDisplay($data = null)
+    public function listAdGroupsExSponsoredDisplay($data = null): array
     {
         return $this->_operation("sd/adGroups/extended", $data);
     }
 
-    public function getBiddableKeyword($keywordId)
+    public function getBiddableKeyword($keywordId): array
     {
         return $this->_operation("sp/keywords/{$keywordId}");
     }
 
-    public function getBiddableKeywordEx($keywordId)
+    public function getBiddableKeywordEx($keywordId): array
     {
         return $this->_operation("sp/keywords/extended/{$keywordId}");
     }
 
-    public function createBiddableKeywords($data)
+    public function createBiddableKeywords($data): array
     {
         return $this->_operation("sp/keywords", $data, "POST");
     }
 
-    public function createBiddableKeywordsBrands($data)
+    public function createBiddableKeywordsBrands($data): array
     {
         return $this->_operation("sb/keywords", $data, "POST");
     }
 
-    public function updateBiddableKeywords($data)
+    public function updateBiddableKeywords($data): array
     {
         return $this->_operation("sp/keywords", $data, "PUT");
     }
 
-    public function archiveBiddableKeyword($keywordId)
+    public function archiveBiddableKeyword($keywordId): array
     {
         return $this->_operation("sp/keywords/{$keywordId}", null, "DELETE");
     }
 
-    public function listBiddableKeywords($data = null)
+    public function listBiddableKeywords($data = null): array
     {
         return $this->_operation("sp/keywords", $data);
     }
 
-    public function listBiddableKeywordsEx($data = null)
+    public function listBiddableKeywordsEx($data = null): array
     {
         return $this->_operation("sp/keywords/extended", $data);
     }
 
-    public function getBiddableKeywordBrand($keywordId)
+    public function getBiddableKeywordBrand($keywordId): array
     {
         return $this->_operation("hsa/keywords/{$keywordId}");
     }
 
-    public function createBiddableKeywordsBrand($data)
+    public function createBiddableKeywordsBrand($data): array
     {
         return $this->_operation("hsa/keywords", $data, "POST");
     }
 
-    public function updateBiddableKeywordsBrand($data)
+    public function updateBiddableKeywordsBrand($data): array
     {
         return $this->_operation("hsa/keywords", $data, "PUT");
     }
 
-    public function archiveBiddableKeywordBrand($keywordId)
+    public function archiveBiddableKeywordBrand($keywordId): array
     {
         return $this->_operation("hsa/keywords/{$keywordId}", null, "DELETE");
     }
 
-    public function getNegativeKeyword($keywordId)
+    public function getNegativeKeyword($keywordId): array
     {
         return $this->_operation("sp/negativeKeywords/{$keywordId}");
     }
 
-    public function getNegativeKeywordEx($keywordId)
+    public function getNegativeKeywordEx($keywordId): array
     {
         return $this->_operation("sp/negativeKeywords/extended/{$keywordId}");
     }
 
-    public function createNegativeKeywords($data)
+    public function createNegativeKeywords($data): array
     {
         return $this->_operation("sp/negativeKeywords", $data, "POST");
     }
 
-    public function updateNegativeKeywords($data)
+    public function updateNegativeKeywords($data): array
     {
         return $this->_operation("sp/negativeKeywords", $data, "PUT");
     }
 
-    public function archiveNegativeKeyword($keywordId)
+    public function archiveNegativeKeyword($keywordId): array
     {
         return $this->_operation("sp/negativeKeywords/{$keywordId}", null, "DELETE");
     }
 
-    public function listNegativeKeywords($data = null)
+    public function listNegativeKeywords($data = null): array
     {
         return $this->_operation("sp/negativeKeywords", $data);
     }
 
-    public function listNegativeKeywordsEx($data = null)
+    public function listNegativeKeywordsEx($data = null): array
     {
         return $this->_operation("sp/negativeKeywords/extended", $data);
     }
 
-    public function getCampaignNegativeKeyword($keywordId)
+    public function getCampaignNegativeKeyword($keywordId): array
     {
         return $this->_operation("sp/campaignNegativeKeywords/{$keywordId}");
     }
 
-    public function getCampaignNegativeKeywordEx($keywordId)
+    public function getCampaignNegativeKeywordEx($keywordId): array
     {
         return $this->_operation("sp/campaignNegativeKeywords/extended/{$keywordId}");
     }
 
-    public function createCampaignNegativeKeywords($data)
+    public function createCampaignNegativeKeywords($data): array
     {
         return $this->_operation("sp/campaignNegativeKeywords", $data, "POST");
     }
 
-    public function updateCampaignNegativeKeywords($data)
+    public function updateCampaignNegativeKeywords($data): array
     {
         return $this->_operation("sp/campaignNegativeKeywords", $data, "PUT");
     }
 
-    public function removeCampaignNegativeKeyword($keywordId)
+    public function removeCampaignNegativeKeyword($keywordId): array
     {
         return $this->_operation("sp/campaignNegativeKeywords/{$keywordId}", null, "DELETE");
     }
 
-    public function listCampaignNegativeKeywords($data = null)
+    public function listCampaignNegativeKeywords($data = null): array
     {
         return $this->_operation("sp/campaignNegativeKeywords", $data);
     }
 
-    public function listCampaignNegativeKeywordsEx($data = null)
+    public function listCampaignNegativeKeywordsEx($data = null): array
     {
         return $this->_operation("sp/campaignNegativeKeywords/extended", $data);
     }
 
-    public function getProductAd($productAdId)
+    public function getProductAd($productAdId): array
     {
         return $this->_operation("sp/productAds/{$productAdId}");
     }
 
-    public function getProductAdSponsoredDisplay($productAdId)
+    public function getProductAdSponsoredDisplay($productAdId): array
     {
         return $this->_operation("sd/productAds/{$productAdId}");
     }
 
-    public function getProductAdEx($productAdId)
+    public function getProductAdEx($productAdId): array
     {
         return $this->_operation("sp/productAds/extended/{$productAdId}");
     }
 
-    public function getProductAdExSponsoredDisplay($productAdId)
+    public function getProductAdExSponsoredDisplay($productAdId): array
     {
         return $this->_operation("sd/productAds/extended/{$productAdId}");
     }
 
-    public function createProductAds($data)
+    public function createProductAds($data): array
     {
         return $this->_operation("sp/productAds", $data, "POST");
     }
 
-    public function createProductAdsSponsoredDisplay($data)
+    public function createProductAdsSponsoredDisplay($data): array
     {
         return $this->_operation("sd/productAds", $data, "POST");
     }
 
-    public function updateProductAds($data)
+    public function updateProductAds($data): array
     {
         return $this->_operation("sp/productAds", $data, "PUT");
     }
 
-    public function updateProductAdsSponsoredDisplay($data)
+    public function updateProductAdsSponsoredDisplay($data): array
     {
         return $this->_operation("sd/productAds", $data, "PUT");
     }
 
-    public function archiveProductAd($productAdId)
+    public function archiveProductAd($productAdId): array
     {
         return $this->_operation("sp/productAds/{$productAdId}", null, "DELETE");
     }
 
-    public function archiveProductAdSponsoredDisplay($productAdId)
+    public function archiveProductAdSponsoredDisplay($productAdId): array
     {
         return $this->_operation("sd/productAds/{$productAdId}", null, "DELETE");
     }
 
-    public function listProductAds($data = null)
+    public function listProductAds($data = null): array
     {
         return $this->_operation("sp/productAds", $data);
     }
 
-    public function listProductAdsSponsoredDisplay($data = null)
+    public function listProductAdsSponsoredDisplay($data = null): array
     {
         return $this->_operation("sd/productAds", $data);
     }
 
-    public function listProductAdsEx($data = null)
+    public function listProductAdsEx($data = null): array
     {
         return $this->_operation("sp/productAds/extended", $data);
     }
 
-    public function listProductAdsExSponsoredDisplay($data = null)
+    public function listProductAdsExSponsoredDisplay($data = null): array
     {
         return $this->_operation("sd/productAds/extended", $data);
     }
 
-    public function getAdGroupBidRecommendations($adGroupId)
+    public function getAdGroupBidRecommendations($adGroupId): array
     {
         return $this->_operation("sp/adGroups/{$adGroupId}/bidRecommendations");
     }
 
-    public function getKeywordBidRecommendations($keywordId)
+    public function getKeywordBidRecommendations($keywordId): array
     {
         return $this->_operation("sp/keywords/{$keywordId}/bidRecommendations");
     }
 
-    public function bulkGetKeywordBidRecommendations($adGroupId, $data)
+    public function bulkGetKeywordBidRecommendations($adGroupId, $data): array
     {
         $data = [
             "adGroupId" => $adGroupId,
@@ -564,38 +600,38 @@ class Client
         return $this->_operation("sp/keywords/bidRecommendations", $data, "POST");
     }
 
-    public function getAdGroupKeywordSuggestions($data)
+    public function getAdGroupKeywordSuggestions($data): array
     {
         $adGroupId = $data["adGroupId"];
         unset($data["adGroupId"]);
         return $this->_operation("sp/AdGroups/{$adGroupId}/suggested/keywords", $data);
     }
 
-    public function getAdGroupKeywordSuggestionsEx($data)
+    public function getAdGroupKeywordSuggestionsEx($data): array
     {
         $adGroupId = $data["adGroupId"];
         unset($data["adGroupId"]);
         return $this->_operation("sp/AdGroups/{$adGroupId}/suggested/keywords/extended", $data);
     }
 
-    public function getAsinKeywordSuggestions($data)
+    public function getAsinKeywordSuggestions($data): array
     {
         $asin = $data["asin"];
         unset($data["asin"]);
         return $this->_operation("asins/{$asin}/suggested/keywords", $data);
     }
 
-    public function bulkGetAsinKeywordSuggestions($data)
+    public function bulkGetAsinKeywordSuggestions($data): array
     {
         return $this->_operation("asins/suggested/keywords", $data, "POST");
     }
 
-    public function requestSnapshot($recordType, $data = null)
+    public function requestSnapshot($recordType, $data = null): array
     {
         return $this->_operation("sp/{$recordType}/snapshot", $data, "POST");
     }
 
-    public function requestSnapshotBrand($recordType, $data = null)
+    public function requestSnapshotBrand($recordType, $data = null): array
     {
         return $this->_operation("hsa/{$recordType}/snapshot", $data, "POST");
     }
@@ -625,43 +661,44 @@ class Client
     }
 
 
-    public function requestReportV3($recordType, $data = null)
+    public function requestReportV3($recordType, $data = null): array
     {
         return $this->_operation(self::INTERFACE_REPORTS_V3, $data, "POST");
     }
-    public function getReportStatusV3($reportId)
+
+    public function getReportStatusV3($reportId): array
     {
         return $this->_operation(self::INTERFACE_REPORTS_V3 . '/' . $reportId);
     }
 
-    public function requestReport($recordType, $data = null)
+    public function requestReport($recordType, $data = null): array
     {
         return $this->_operation("sp/{$recordType}/report", $data, "POST");
     }
 
-    public function requestAsinReport($data = null)
+    public function requestAsinReport($data = null): array
     {
         return $this->_operation("asins/report", $data, "POST");
     }
 
 
-    public function requestReportBrand($recordType, $data = null)
+    public function requestReportBrand($recordType, $data = null): array
     {
         return $this->_operation("hsa/{$recordType}/report", $data, "POST");
     }
 
-    public function requestReportSponsoredDisplay($recordType, $data = null)
+    public function requestReportSponsoredDisplay($recordType, $data = null): array
     {
         return $this->_operation("sd/{$recordType}/report", $data, "POST");
     }
 
 
-    public function requestReportSearchTerm($data = null)
+    public function requestReportSearchTerm($data = null): array
     {
         return $this->_operation("sp/targets/report", $data, "POST");
     }
 
-    public function getReport($reportId, bool $gunzipResponse=true)
+    public function getReport($reportId, bool $gunzipResponse = true)
     {
         $req = $this->_operation("reports/{$reportId}");
         if ($req["success"]) {
@@ -676,272 +713,325 @@ class Client
     /**
      * Always returns the status of the report. Original getReport() method will automatically return the document.
      */
-    public function getReportStatus($reportId)
+    public function getReportStatus($reportId): array
     {
         $req = $this->_operation("reports/{$reportId}");
         return $req;
     }
 
-    public function getTargetingClause($targetId)
+    public function getTargetingClause($targetId): array
     {
         return $this->_operation("sp/targets/{$targetId}");
     }
 
-    public function getTargetingClauseSponsoredDisplay($targetId)
+    public function getTargetingClauseSponsoredDisplay($targetId): array
     {
         return $this->_operation("sd/targets/{$targetId}");
     }
 
-    public function listTargetingClauses($data = null)
+    public function listTargetingClauses($data = null): array
     {
         return $this->_operation("sp/targets", $data);
     }
 
-    public function listTargetingClausesBrands($data = null)
+    public function listTargetingClausesBrands($data = null): array
     {
         return $this->_operation("/sb/targets/list", $data, "POST");
     }
 
-    public function listTargetingClausesSponsoredDisplay($data = null)
+    public function listTargetingClausesSponsoredDisplay($data = null): array
     {
         return $this->_operation("sd/targets", $data);
     }
 
-    public function getTargetingClauseEx($targetId)
+    public function getTargetingClauseEx($targetId): array
     {
         return $this->_operation("sp/targets/extended/{$targetId}");
     }
 
-    public function getTargetingClauseExSponsoredDisplay($targetId)
+    public function getTargetingClauseExSponsoredDisplay($targetId): array
     {
         return $this->_operation("sd/targets/extended/{$targetId}");
     }
 
 
-    public function listTargetingClausesEx($data = null)
+    public function listTargetingClausesEx($data = null): array
     {
         return $this->_operation("sp/targets/extended", $data);
     }
 
-    public function listTargetingClausesExSponsoredDisplay($data = null)
+    public function listTargetingClausesExSponsoredDisplay($data = null): array
     {
         return $this->_operation("sd/targets/extended", $data);
     }
 
-    public function createTargetingClauses($data)
+    public function createTargetingClauses($data): array
     {
         return $this->_operation("sp/targets", $data, "POST");
     }
 
-    public function createTargetingClausesBrands($data)
+    public function createTargetingClausesBrands($data): array
     {
         return $this->_operation("sb/targets", $data, "POST");
     }
 
-    public function createTargetingClausesSponsoredDisplay($data)
+    public function createTargetingClausesSponsoredDisplay($data): array
     {
         return $this->_operation("sd/targets", $data, "POST");
     }
 
-    public function updateTargetingClauses($data)
+    public function updateTargetingClauses($data): array
     {
         return $this->_operation("sp/targets", $data, "PUT");
     }
 
-    public function updateTargetingClausesBrands($data)
+    public function updateTargetingClausesBrands($data): array
     {
         return $this->_operation("sb/targets", $data, "PUT");
     }
 
-    public function updateTargetingClausesSponsoredDisplay($data)
+    public function updateTargetingClausesSponsoredDisplay($data): array
     {
         return $this->_operation("sd/targets", $data, "PUT");
     }
 
-    public function archiveTargetingClause($targetId)
+    public function archiveTargetingClause($targetId): array
     {
         return $this->_operation("sp/targets/" . $targetId, [], 'DELETE');
     }
 
-    public function archiveTargetingClauseBrands($targetId)
+    public function archiveTargetingClauseBrands($targetId): array
     {
         return $this->_operation("sb/targets/" . $targetId, [], 'DELETE');
     }
 
-    public function archiveTargetingClauseSponsoredDisplay($targetId)
+    public function archiveTargetingClauseSponsoredDisplay($targetId): array
     {
         return $this->_operation("sd/targets/" . $targetId, [], 'DELETE');
     }
 
 
-    public function generateTargetsProductRecommendations($data)
+    public function generateTargetsProductRecommendations($data): array
     {
         return $this->_operation("sp/targets/productRecommendations", $data, 'POST');
     }
 
-    public function getTargetingCategories($data)
+    public function getTargetingCategories($data): array
     {
         return $this->_operation("sp/targets/categories", $data);
     }
 
-    public function getBrandRecommendations($data)
+    public function getBrandRecommendations($data): array
     {
         return $this->_operation("sp/targets/brands", $data);
     }
 
-    public function getNegativeTargetingClause($targetId)
+    public function getNegativeTargetingClause($targetId): array
     {
         return $this->_operation("sp/negativeTargets/" . $targetId);
     }
 
-    public function getNegativeTargetingClauseEx($targetId)
+    public function getNegativeTargetingClauseEx($targetId): array
     {
         return $this->_operation("sp/negativeTargets/extended/" . $targetId);
     }
 
-    public function listNegativeTargetingClauses($data = null)
+    public function listNegativeTargetingClauses($data = null): array
     {
         return $this->_operation("sp/negativeTargets", $data);
     }
 
-    public function listNegativeTargetingClausesEx($data = null)
+    public function listNegativeTargetingClausesEx($data = null): array
     {
         return $this->_operation("sp/negativeTargets/extended", $data);
     }
 
-    public function createNegativeTargetingClauses($data)
+    public function createNegativeTargetingClauses($data): array
     {
         return $this->_operation("sp/negativeTargets", $data, 'POST');
     }
 
-    public function updateNegativeTargetingClauses($data)
+    public function updateNegativeTargetingClauses($data): array
     {
         return $this->_operation("sp/negativeTargets", $data, 'PUT');
     }
 
-    public function archiveNegativeTargetingClause($targetId)
+    public function archiveNegativeTargetingClause($targetId): array
     {
-        return $this->_operation("sp/negativeTargets/" . $targetId, 'DELETE');
+        return $this->_operation("sp/negativeTargets/" . $targetId, null, 'DELETE');
     }
 
-    public function getTargetBidRecommendations($data)
+    public function getTargetBidRecommendations($data): array
     {
         return $this->_operation("sp/targets/bidRecommendations", $data, "POST");
     }
 
-    public function getTargetKeywordRecommendations($data)
+    public function getTargetKeywordRecommendations($data): array
     {
         return $this->_operation("sp/targets/keywords/recommendations", $data, "POST");
     }
 
-    public function listPortfolios($data = null)
+    public function listPortfolios($data = null): array
     {
         return $this->_operation("portfolios", $data);
     }
 
-    public function listPortfoliosEx($data = null)
+    public function listPortfoliosEx($data = null): array
     {
         return $this->_operation("portfolios/extended", $data);
     }
 
-    public function getPortfolio($portfolioId)
+    public function getPortfolio($portfolioId): array
     {
         return $this->_operation("portfolios/{$portfolioId}");
     }
 
-    public function getPortfolioEx($portfolioId)
+    public function getPortfolioEx($portfolioId): array
     {
         return $this->_operation("portfolios/extended/{$portfolioId}");
     }
 
-    public function createPortfolios($data)
+    public function createPortfolios($data): array
     {
         return $this->_operation("portfolios", $data, "POST");
     }
 
-    public function updatePortfolios($data)
+    public function updatePortfolios($data): array
     {
         return $this->_operation("portfolios", $data, "PUT");
     }
 
-    public function getAdGroupSuggestedKeywords($adGroupId)
+    public function getAdGroupSuggestedKeywords($adGroupId): array
     {
         return $this->_operation("sp/adGroups/" . $adGroupId . "/suggested/keywords");
     }
 
-    public function getAsinSuggestedKeywords($asinValue)
+    public function getAsinSuggestedKeywords($asinValue): array
     {
         return $this->_operation("sp/asins/" . $asinValue . "/suggested/keywords");
     }
 
-    public function bulkGetAsinSuggestedKeywords($data)
+    public function bulkGetAsinSuggestedKeywords($data): array
     {
         return $this->_operation("sp/asins/suggested/keywords", $data, "POST");
     }
 
-    public function listAssets($data = null)
+    public function listAssets($data = null): array
     {
         return $this->_operation("stores/assets", $data);
     }
 
-    public function listBrands($data = null)
+    public function listBrands($data = null): array
     {
         return $this->_operation("brands", $data);
     }
 
     /** Amazon attribution start  */
-    public function getAttributionListPublishers($data = null)
+    public function getAttributionListPublishers($data = null): array
     {
         return $this->_operation("attribution/publishers", $data);
     }
 
-    public function getAttributionReports($data = null)
+    public function getAttributionReports($data = null): array
     {
         return $this->_operation("attribution/report", $data, "POST");
     }
 
-    public function getAttributionNonMacroTemplateTag($data = null)
+    public function getAttributionNonMacroTemplateTag($data = null): array
     {
         return $this->_operation("attribution/tags/nonMacroTemplateTag", $data);
     }
 
-    public function getAttributionMacroTemplateTag($data = null)
+    public function getAttributionMacroTemplateTag($data = null): array
     {
         return $this->_operation("attribution/tags/macroTag", $data);
     }
 
-    public function getAttributionAdvertisers($data = null)
+    public function getAttributionAdvertisers($data = null): array
     {
         return $this->_operation("attribution/advertisers", $data);
     }
 
     /** Amazon attribution end */
 
-    public function getHistoryData($data = null)
+    public function getHistoryData($data = null): array
     {
         return $this->_operation("history", $data, "POST");
     }
 
+    /** AMS Start  */
+
+    public function amsListSubscriptions(): array
+    {
+        return $this->_operation(self::INTERFACE_AMS);
+    }
+
+    /**
+     * @param string $dataSetId
+     * @param string $destinationArn
+     * @param string|null $clientRequestToken
+     * @param string $notes
+     * @return array
+     * @throws \Exception
+     */
+    public function amsCreateSubscriptionAssisted(
+        string $dataSetId,
+        string $destinationArn,
+        string $clientRequestToken = null,
+        string $notes = ''
+    ): array
+    {
+        $data = [
+            'dataSetId' => $dataSetId,
+            'destinationArn' => $destinationArn,
+            'clientRequestToken' => $clientRequestToken,
+            'notes' => $notes
+        ];
+        return $this->amsCreateSubscription($data);
+    }
+    /**
+     * @param array{
+     *     dataSetId: string,
+     *     destinationArn: string,
+     *     clientRequestToken?: string,
+     *     notes?: string,
+     * }|null $data
+     * @return array
+     * @throws \Exception
+     */
+    public function amsCreateSubscription(?array $data = null): array
+    {
+        if (empty($data['dataSetId']) || empty($data['destinationArn'])) {
+            throw new \Exception('dataSetId and destinationArn are required');
+        }
+        if (empty($data['clientRequestToken'])) {
+            $data['clientRequestToken'] = uniqid();
+        }
+        return $this->_operation(self::INTERFACE_AMS, $data, 'POST');
+    }
+
+    /** AMS End  */
+
     /** Amazon Ad Creatives Start  */
 
-    public function listSbAdCreatives($data = null)
+    public function listSbAdCreatives($data = null): array
     {
         return $this->_operation("sb/ads/creatives/list", $data, "POST");
     }
 
-    public function listSbAds($data = null)
+    public function listSbAds($data = null): array
     {
         return $this->_operation("sb/v4/ads/list", $data, "POST");
     }
 
     /** Amazon Ad Creatives End  */
 
-    public function requestBrandMetrics($data = null)
+    public function requestBrandMetrics($data = null): array
     {
         return $this->_operation("insights/brandMetrics/report", $data, "POST");
     }
 
-    public function getBrandMetricsReport($reportId, bool $gunzipResponse=true)
+    public function getBrandMetricsReport($reportId, bool $gunzipResponse=true): array
     {
         $req = $this->_operation("insights/brandMetrics/report/{$reportId}");
         if ($req["success"]) {
@@ -975,7 +1065,7 @@ class Client
         return $req;
     }
 
-    public function getBrandMetricsReportStatus($reportId)
+    public function getBrandMetricsReportStatus($reportId): array
     {
         $req = $this->_operation("insights/brandMetrics/report/{$reportId}");
         return $req;
@@ -990,7 +1080,7 @@ class Client
      * @return array
      * @throws \Exception
      */
-    public function createAsset($data, $filePath, $imageType, $fileName)
+    public function createAsset($data, $filePath, $imageType, $fileName): array
     {
         $headers = [
             'Content-Disposition: ' . $fileName
@@ -1004,15 +1094,15 @@ class Client
 
         if (!$downloadActualFile) {
             /* only send authorization header when not downloading actual file */
-            array_push($headers, "Authorization: bearer {$this->config["accessToken"]}");
+            $headers[] = "Authorization: bearer {$this->config["accessToken"]}";
         }
 
         if (!is_null($this->profileId)) {
-            array_push($headers, "Amazon-Advertising-API-Scope: {$this->profileId}");
+            $headers[] = "Amazon-Advertising-API-Scope: {$this->profileId}";
         }
 
         if (!is_null($this->config['clientId'])) {
-            array_push($headers, "Amazon-Advertising-API-ClientId: {$this->config['clientId']}");
+            $headers[] = "Amazon-Advertising-API-ClientId: {$this->config['clientId']}";
         }
 
         $request = new CurlRequest();
@@ -1038,14 +1128,21 @@ class Client
         return $this->_executeRequest($request, $gunzipResponse);
     }
 
-    private function _operation($interface, $params = [], $method = "GET", $additionalHeaders = [])
+    /**
+     * @param string $interface
+     * @param null|array<string, mixed> $params
+     * @param string $method
+     * @param list<string> $additionalHeaders
+     * @return array
+     */
+    private function _operation(string $interface, ?array $params = [], string $method = "GET", array $additionalHeaders = []): array
     {
         if (self::INTERFACE_REPORTS_V3 === $interface) {
             $contentType = 'application/vnd.createasyncreportrequest.v3+json';
-        } elseif (isset(self::ROUTE_ACCEPT_TYPE_MAPPING[$interface])) {
-            $contentType = 'text/plain';
-            $acceptType = self::ROUTE_ACCEPT_TYPE_MAPPING[$interface];
-        } elseif ($interface === 'sp/targets/keywords/recommendations') {
+        } elseif (!is_null($mappingKey = $this->getAcceptTypeMappingKey($interface))) {
+            $acceptType = self::ROUTE_ACCEPT_TYPE_MAPPING[$mappingKey];
+            $contentType = $this->getContentTypeMappingForKeyAndMethod($mappingKey, $method, 'application/json');
+        } elseif ('sp/targets/keywords/recommendations' === $interface) {
             $contentType = 'application/vnd.spkeywordsrecommendation.v5+json';
         } else {
             $contentType = 'application/json';
@@ -1062,43 +1159,29 @@ class Client
         }
 
         if (!is_null($this->config['clientId'])) {
-            array_push($headers, "Amazon-Advertising-API-ClientId: {$this->config['clientId']}");
+            $headers[] = "Amazon-Advertising-API-ClientId: {$this->config['clientId']}";
         }
 
         if (!empty($additionalHeaders)) {
             foreach ($additionalHeaders as $header) {
-                array_push($headers, $header);
+                $headers[] = $header;
             }
         }
 
         $request = new CurlRequest();
         $url = "{$this->endpoint}/{$interface}";
 
-        $excludedVersionForInterfaceList = ['brands', 'stores/assets', 'sb/campaigns', 'sb/targets', 'sb/keywords', self::INTERFACE_REPORTS_V3];
-        if (array_search($interface, $excludedVersionForInterfaceList) !== false) {
-            $url = str_replace('/' . $this->apiVersion, '', $url);
-        } elseif (str_contains($url, $this->apiVersion . '/' . self::INTERFACE_REPORTS_V3)) {
-            $url = str_replace('/' . $this->apiVersion, '', $url);
-        } elseif (strpos($url, 'sb/ads') !== false || strpos($url, 'ads/list') !== false) {
-            $url = str_replace('/' . $this->apiVersion, '', $url);
-        } elseif (strpos($url, 'insights/brandMetrics') !== false) {
-            $url = str_replace('/' . $this->apiVersion, '', $url);
-        } elseif (strpos($url, 'sp/targets/keywords') !== false) {
+        if ($this->isUrlThatDoesNotWantApiVersionInPath($interface, $url)) {
             $url = str_replace('/' . $this->apiVersion, '', $url);
         }
 
-        if (strpos($url, 'sb/campaigns') !== false OR strpos($url, 'history') !== false) {
-            $url = str_replace('/' . $this->apiVersion, '', $url);
-        }
-
-        if (strpos($url, '/attribution') !== false) {
-            $url = str_replace('/' . $this->apiVersion, '', $url);
+        if (str_contains($url, '/attribution')) {
             if (!is_null($this->profileIdAttribution)) {
-                array_push($headers, "Amazon-Advertising-API-Scope: {$this->profileIdAttribution}");
+                $headers[] = "Amazon-Advertising-API-Scope: {$this->profileIdAttribution}";
             }
         } else {
             if (!is_null($this->profileId)) {
-                array_push($headers, "Amazon-Advertising-API-Scope: {$this->profileId}");
+                $headers[] = "Amazon-Advertising-API-Scope: {$this->profileId}";
             }
         }
 
@@ -1134,16 +1217,51 @@ class Client
         return $this->_executeRequest($request);
     }
 
+    private function isUrlThatDoesNotWantApiVersionInPath(string $interface, string $url): bool
+    {
+        if (in_array($interface, self::INTERFACES_THAT_DO_NOT_USE_API_VERSION)) {
+            return true;
+        } elseif (str_contains($url, $this->apiVersion . '/' . self::INTERFACE_REPORTS_V3)) {
+            return true;
+        }
+
+        foreach (self::PARTIAL_URLS_THAT_DO_NOT_USE_API_VERSION as $partialUrl) {
+            if (str_contains($url, $partialUrl)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function getAcceptTypeMappingKey(string $interface): ?string
+    {
+        foreach (self::ROUTE_ACCEPT_TYPE_MAPPING as $key => $value) {
+            if (str_starts_with($interface, $key)) {
+                return $key;
+            }
+        }
+        return null;
+    }
+    private function getContentTypeMappingForKeyAndMethod(string $key, string $method, string $default): string
+    {
+        $contentType = self::ROUTE_CONTENT_TYPE_MAPPING[$key][$method] ?? $default;
+        if (true === $contentType) { // true means use accept type
+            $contentType = self::ROUTE_ACCEPT_TYPE_MAPPING[$key];
+        }
+        return $contentType;
+    }
+
     /**
-     * @param array $params
-     * @param array $filenames
-     * @param array $additionalHeaders
+     * @param array<string, string> $params
+     * @param list<string> $filenames
+     * @param list<string> $additionalHeaders
      * @param string $imageType
      * @param string $fileName
      * @return array
      * @throws \Exception
      */
-    private function _UploadAsset($params, $filenames, $additionalHeaders, $imageType, $fileName)
+    private function _UploadAsset(array $params, array $filenames, array $additionalHeaders, string $imageType, string $fileName): array
     {
 
         $files = [];
@@ -1165,16 +1283,16 @@ class Client
         ];
 
         if (!is_null($this->profileId)) {
-            array_push($headers, "Amazon-Advertising-API-Scope: {$this->profileId}");
+            $headers[] = "Amazon-Advertising-API-Scope: {$this->profileId}";
         }
 
         if (!is_null($this->config['clientId'])) {
-            array_push($headers, "Amazon-Advertising-API-ClientId: {$this->config['clientId']}");
+            $headers[] = "Amazon-Advertising-API-ClientId: {$this->config['clientId']}";
         }
 
         if (!empty($additionalHeaders)) {
             foreach ($additionalHeaders as $header) {
-                array_push($headers, $header);
+                $headers[] = $header;
             }
         }
 
@@ -1193,28 +1311,22 @@ class Client
 
 
     /**
-     * @throws \Exception
+     * @param string $boundary
+     * @param array<string, string> $fields
+     * @param array<string, string> $files
+     * @param string $imageType
+     * @param string $fileName
+     * @return string
      */
-    protected function build_data_files($boundary, $fields, $files, $imageType, $fileName)
+    protected function build_data_files(string $boundary, array $fields, array $files, string $imageType, string $fileName): string
     {
 
-        $imageMimeType = '';
-        switch ($imageType) {
-            case 'PNG':
-                $imageMimeType = 'image/png';
-                break;
-
-            case 'JPEG':
-                $imageMimeType = 'image/jpeg';
-                break;
-
-            case 'GIF':
-                $imageMimeType = 'image/gif';
-                break;
-
-            default:
-                $this->_logAndThrow("Unknown image type {$imageType}.");
-        }
+        $imageMimeType = match ($imageType) {
+            'PNG' => 'image/png',
+            'JPEG' => 'image/jpeg',
+            'GIF' => 'image/gif',
+            default => $this->_logAndThrow("Unknown image type {$imageType}."),
+        };
 
         $data = '';
         $eol = "\r\n";
@@ -1279,7 +1391,7 @@ class Client
     /**
      * @throws \Exception
      */
-    private function _validateConfig($config)
+    private function _validateConfig($config): void
     {
         if (is_null($config)) {
             $this->_logAndThrow("'config' cannot be null.");
@@ -1297,7 +1409,7 @@ class Client
     /**
      * @throws \Exception
      */
-    private function _validateConfigParameters()
+    private function _validateConfigParameters(): void
     {
         foreach ($this->config as $k => $v) {
             if (is_null($v) && $k !== "accessToken" && $k !== "refreshToken") {
@@ -1340,7 +1452,7 @@ class Client
     /**
      * @throws \Exception
      */
-    private function _setEndpoints()
+    private function _setEndpoints(): void
     {
         /* check if region exists and set api/token endpoints */
         if (array_key_exists(strtolower($this->config["region"]), $this->endpoints)) {
@@ -1359,11 +1471,11 @@ class Client
 
     /**
      * @param $message
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     private function _logAndThrow($message)
     {
         error_log($message, 0);
-        throw new \Exception($message);
+        throw new \RuntimeException($message);
     }
 }
