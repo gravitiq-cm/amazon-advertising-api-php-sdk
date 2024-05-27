@@ -1009,6 +1009,21 @@ class Client
         }
         return $this->_operation(self::INTERFACE_AMS, $data, 'POST');
     }
+    /**
+     * @param string $subscriptionId
+     * @param ?string $notes
+     * @return array
+     * @throws \Exception
+     */
+    public function amsArchiveSubscription(string $subscriptionId, ?string $notes=null): array
+    {
+        $url = self::INTERFACE_AMS . '/' . $subscriptionId;
+        $data = ['status' => 'ARCHIVED'];
+        if (!empty($notes)) {
+            $data['notes'] = $notes;
+        }
+        return $this->_operation($url, $data, 'PUT');
+    }
 
     /** AMS End  */
 
