@@ -12,6 +12,7 @@ class Client
     private const INTERFACE_AMS = 'streams/subscriptions';
     private const INTERFACE_SB_ADS_LIST = 'sb/v4/ads/list';
     private const INTERFACE_SB_ADS_CREATIVES_LIST = 'sb/ads/creatives/list';
+    private const AMC_PARTIAL_URL = 'amc/';
 
     private const INTERFACES_THAT_DO_NOT_USE_API_VERSION = [
         'brands', 'stores/assets', 'sb/campaigns', 'sb/targets', 'sb/keywords', self::INTERFACE_REPORTS_V3
@@ -24,7 +25,9 @@ class Client
         'sb/ads',
         'sb/campaigns',
         'sp/targets/keywords',
-        self::INTERFACE_AMS
+        'targetableEntities/',
+        self::INTERFACE_AMS,
+        self::AMC_PARTIAL_URL,
     ];
 
     /**
@@ -57,6 +60,8 @@ class Client
     /** @var array<string, string>  */
     private array $versionStrings;
     public ?string $profileId = null;
+    public ?string $marketPlaceId = null;
+    public ?string $amcAccountId = null;
     /*
     Also note that Amazon Attribution accounts are a separate type of "profile". Only Amazon Attribution profiles can be
     called within the Amazon Attribution API. When getting the Profiles resource, identify the correct Amazon Attribution
@@ -155,6 +160,12 @@ class Client
             'refreshToken' => $this->config["refreshToken"],
             'response' => $response,
         ];
+    }
+
+    public function setAmcConfig(string $marketplaceId, string $amcAccountId): void
+    {
+        $this->marketPlaceId = $marketplaceId;
+        $this->amcAccountId = $amcAccountId;
     }
 
     private function _makeCurlTokenRequest($params): array
@@ -1086,6 +1097,24 @@ class Client
         return $req;
     }
 
+    public function getTargetableEntities(?array $data = null): array
+    {
+        return $this->_operation("targetableEntities/list", $data, 'POST');
+    }
+
+    /**
+     * AMC Endpoint start
+     */
+
+    public function getInstances(): array
+    {
+        return $this->_operation("amc/instances");
+    }
+
+    /**
+     * AMC Endpoint end
+     */
+
     /**
      * @param $data
      *  [        'assetInfo' => '{brandEntityId: "ENTITY123456", mediaType: "brandLogo"}'    ];
@@ -1194,6 +1223,15 @@ class Client
             if (!is_null($this->profileIdAttribution)) {
                 $headers[] = "Amazon-Advertising-API-Scope: {$this->profileIdAttribution}";
             }
+        } elseif ($this->isAmcUrl($url)) {
+            if (empty($this->amcAccountId)) {
+                $this->_logAndThrow("AMC endpoint requires amcAccountId to be set.");
+            }
+            if (empty($this->marketPlaceId)) {
+                $this->_logAndThrow("AMC endpoint requires marketPlaceId to be set.");
+            }
+            $headers[] = "Amazon-Advertising-API-AdvertiserId: {$this->amcAccountId}";
+            $headers[] = "Amazon-Advertising-API-MarketplaceId: {$this->marketPlaceId}";
         } else {
             if (!is_null($this->profileId)) {
                 $headers[] = "Amazon-Advertising-API-Scope: {$this->profileId}";
@@ -1247,6 +1285,11 @@ class Client
         }
 
         return false;
+    }
+
+    private function isAmcUrl(string $url): bool
+    {
+        return str_contains($url, self::AMC_PARTIAL_URL);
     }
 
     private function getAcceptTypeMappingKey(string $interface): ?string
