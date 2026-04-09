@@ -13,6 +13,7 @@ class Client
     private const INTERFACE_SB_ADS_LIST = 'sb/v4/ads/list';
     private const INTERFACE_SB_ADS_CREATIVES_LIST = 'sb/ads/creatives/list';
     private const AMC_PARTIAL_URL = 'amc/';
+    private const ADS_API_QUERY_V1_PARTIAL = 'adsApi/v1/query';
 
     private const INTERFACES_THAT_DO_NOT_USE_API_VERSION = [
         'brands', 'stores/assets', 'sb/campaigns', 'sb/targets', 'sb/keywords', self::INTERFACE_REPORTS_V3
@@ -28,6 +29,7 @@ class Client
         'targetableEntities/',
         self::INTERFACE_AMS,
         self::AMC_PARTIAL_URL,
+        self::ADS_API_QUERY_V1_PARTIAL,
     ];
 
     /**
@@ -1110,10 +1112,24 @@ class Client
     {
         return $this->_operation("amc/instances");
     }
-
     /**
      * AMC Endpoint end
      */
+
+    public function getCampaigns(?array $data = null): array
+    {
+        return $this->_operation(self::ADS_API_QUERY_V1_PARTIAL . "/campaigns", $data, 'POST');
+    }
+
+    public function getAdGroups(?array $data = null): array
+    {
+        return $this->_operation(self::ADS_API_QUERY_V1_PARTIAL . "/adGroups", $data, 'POST');
+    }
+
+    public function getAds(?array $data = null): array
+    {
+        return $this->_operation(self::ADS_API_QUERY_V1_PARTIAL . "/ads", $data, 'POST');
+    }
 
     /**
      * @param $data
