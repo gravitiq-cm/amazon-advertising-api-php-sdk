@@ -1131,6 +1131,11 @@ class Client
         return $this->_operation(self::ADS_API_QUERY_V1_PARTIAL . "/ads", $data, 'POST');
     }
 
+    public function getAdLibraryAds(?array $data = null): array
+    {
+        return $this->_operation("adRepository/ads/list", $data, 'POST');
+    }
+
     /**
      * @param $data
      *  [        'assetInfo' => '{brandEntityId: "ENTITY123456", mediaType: "brandLogo"}'    ];
