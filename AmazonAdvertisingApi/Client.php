@@ -14,6 +14,7 @@ class Client
     private const INTERFACE_SB_ADS_CREATIVES_LIST = 'sb/ads/creatives/list';
     private const AMC_PARTIAL_URL = 'amc/';
     private const ADS_API_QUERY_V1_PARTIAL = 'adsApi/v1/query';
+    private const PORFOLIOS_PARTIAL = 'portfolios';
 
     private const INTERFACES_THAT_DO_NOT_USE_API_VERSION = [
         'brands', 'stores/assets', 'sb/campaigns', 'sb/targets', 'sb/keywords', self::INTERFACE_REPORTS_V3
@@ -30,6 +31,7 @@ class Client
         self::INTERFACE_AMS,
         self::AMC_PARTIAL_URL,
         self::ADS_API_QUERY_V1_PARTIAL,
+        self::PORFOLIOS_PARTIAL,
     ];
 
     /**
@@ -886,32 +888,32 @@ class Client
 
     public function listPortfolios($data = null): array
     {
-        return $this->_operation("portfolios", $data);
+        return $this->_operation(self::PORFOLIOS_PARTIAL . "/list", $data, "POST");
     }
 
     public function listPortfoliosEx($data = null): array
     {
-        return $this->_operation("portfolios/extended", $data);
+        return $this->_operation(self::PORFOLIOS_PARTIAL . "/extended", $data);
     }
 
     public function getPortfolio($portfolioId): array
     {
-        return $this->_operation("portfolios/{$portfolioId}");
+        return $this->_operation(self::PORFOLIOS_PARTIAL . "/{$portfolioId}");
     }
 
     public function getPortfolioEx($portfolioId): array
     {
-        return $this->_operation("portfolios/extended/{$portfolioId}");
+        return $this->_operation(self::PORFOLIOS_PARTIAL . "/extended/{$portfolioId}");
     }
 
     public function createPortfolios($data): array
     {
-        return $this->_operation("portfolios", $data, "POST");
+        return $this->_operation(self::PORFOLIOS_PARTIAL, $data, "POST");
     }
 
     public function updatePortfolios($data): array
     {
-        return $this->_operation("portfolios", $data, "PUT");
+        return $this->_operation(self::PORFOLIOS_PARTIAL, $data, "PUT");
     }
 
     public function getAdGroupSuggestedKeywords($adGroupId): array
