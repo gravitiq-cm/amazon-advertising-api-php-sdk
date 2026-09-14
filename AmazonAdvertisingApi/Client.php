@@ -14,6 +14,7 @@ class Client
     private const INTERFACE_SB_ADS_CREATIVES_LIST = 'sb/ads/creatives/list';
     private const AMC_PARTIAL_URL = 'amc/';
     private const ADS_API_QUERY_V1_PARTIAL = 'adsApi/v1/query';
+    private const ADS_API_V1_PARTIAL = 'adsApi/v1/';
     private const PORFOLIOS_PARTIAL = 'portfolios';
 
     private const INTERFACES_THAT_DO_NOT_USE_API_VERSION = [
@@ -30,7 +31,7 @@ class Client
         'targetableEntities/',
         self::INTERFACE_AMS,
         self::AMC_PARTIAL_URL,
-        self::ADS_API_QUERY_V1_PARTIAL,
+        self::ADS_API_V1_PARTIAL,
         self::PORFOLIOS_PARTIAL,
     ];
 
@@ -684,6 +685,26 @@ class Client
     public function getReportStatusV3($reportId): array
     {
         return $this->_operation(self::INTERFACE_REPORTS_V3 . '/' . $reportId);
+    }
+
+    public function createReport101(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "create/reports", $data, "POST");
+    }
+
+    public function retrieveReport101(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "retrieve/reports", $data, "POST");
+    }
+
+    public function deleteReport101(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "delete/reports", $data, "POST");
+    }
+
+    public function queryAdvertiserAccounts(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "query/advertiserAccounts", $data, "POST");
     }
 
     public function requestReport($recordType, $data = null): array
