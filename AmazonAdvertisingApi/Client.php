@@ -15,7 +15,7 @@ class Client
     private const AMC_PARTIAL_URL = 'amc/';
     private const ADS_API_QUERY_V1_PARTIAL = 'adsApi/v1/query';
     private const ADS_API_V1_PARTIAL = 'adsApi/v1/';
-    private const PORFOLIOS_PARTIAL = 'portfolios';
+    private const PORTFOLIOS_PARTIAL = 'portfolios';
 
     private const INTERFACES_THAT_DO_NOT_USE_API_VERSION = [
         'brands', 'stores/assets', 'sb/campaigns', 'sb/targets', 'sb/keywords', self::INTERFACE_REPORTS_V3
@@ -32,7 +32,7 @@ class Client
         self::INTERFACE_AMS,
         self::AMC_PARTIAL_URL,
         self::ADS_API_V1_PARTIAL,
-        self::PORFOLIOS_PARTIAL,
+        self::PORTFOLIOS_PARTIAL,
     ];
 
     /**
@@ -909,32 +909,32 @@ class Client
 
     public function listPortfolios($data = null): array
     {
-        return $this->_operation(self::PORFOLIOS_PARTIAL . "/list", $data, "POST");
+        return $this->_operation(self::PORTFOLIOS_PARTIAL . "/list", $data, "POST");
     }
 
     public function listPortfoliosEx($data = null): array
     {
-        return $this->_operation(self::PORFOLIOS_PARTIAL . "/extended", $data);
+        return $this->_operation(self::PORTFOLIOS_PARTIAL . "/extended", $data);
     }
 
     public function getPortfolio($portfolioId): array
     {
-        return $this->_operation(self::PORFOLIOS_PARTIAL . "/{$portfolioId}");
+        return $this->_operation(self::PORTFOLIOS_PARTIAL . "/{$portfolioId}");
     }
 
     public function getPortfolioEx($portfolioId): array
     {
-        return $this->_operation(self::PORFOLIOS_PARTIAL . "/extended/{$portfolioId}");
+        return $this->_operation(self::PORTFOLIOS_PARTIAL . "/extended/{$portfolioId}");
     }
 
     public function createPortfolios($data): array
     {
-        return $this->_operation(self::PORFOLIOS_PARTIAL, $data, "POST");
+        return $this->_operation(self::PORTFOLIOS_PARTIAL, $data, "POST");
     }
 
     public function updatePortfolios($data): array
     {
-        return $this->_operation(self::PORFOLIOS_PARTIAL, $data, "PUT");
+        return $this->_operation(self::PORTFOLIOS_PARTIAL, $data, "PUT");
     }
 
     public function getAdGroupSuggestedKeywords($adGroupId): array
