@@ -61,7 +61,6 @@ class ReportDefinition
         self::REPORT_PERIOD_HOURLY => ['hour.value'],
     ];
 
-    /** hour.value is documented as incompatible with the impression-share metrics both report types carry. */
     const DISALLOWED_REPORT_PERIODS_BY_REPORT_TYPE = [
         self::REPORT_TYPE_SEARCH_TERM_IMPRESSION_SHARE => [self::REPORT_PERIOD_HOURLY],
         self::REPORT_TYPE_CAMPAIGN_TOP_OF_SEARCH_IMPRESSION_SHARE => [self::REPORT_PERIOD_HOURLY],
