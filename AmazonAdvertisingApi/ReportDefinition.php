@@ -43,9 +43,31 @@ class ReportDefinition
         self::REPORT_TYPE_CAMPAIGN_TOP_OF_SEARCH_IMPRESSION_SHARE => [self::MG_CAM_TOSIS_V1],
     ];
 
-    const MAX_DATE_RANGE_DAYS_BY_REPORT_TYPE = [
-        self::REPORT_TYPE_SEARCH_TERM_IMPRESSION_SHARE => 31,
-        self::REPORT_TYPE_CAMPAIGN_TOP_OF_SEARCH_IMPRESSION_SHARE => 31,
+    const REPORT_PERIOD_DATE_RANGE = 'X';
+    const REPORT_PERIOD_DAILY = 'D';
+    const REPORT_PERIOD_WEEKLY = 'W';
+    const REPORT_PERIOD_MONTHLY = 'M';
+    const REPORT_PERIOD_YEARLY = 'Y';
+
+    const MAX_RANGE_DAYS = 120;
+
+    const REPORT_PERIOD_FIELDS = [
+        self::REPORT_PERIOD_DATE_RANGE => ['dateRange.value'],
+        self::REPORT_PERIOD_DAILY => ['date.value'],
+        self::REPORT_PERIOD_WEEKLY => ['year.value', 'week.value'],
+        self::REPORT_PERIOD_MONTHLY => ['year.value', 'month.value'],
+        self::REPORT_PERIOD_YEARLY => ['year.value'],
+    ];
+
+    const ALLOWED_REPORT_PERIODS_BY_REPORT_TYPE = [
+        self::REPORT_TYPE_SEARCH_TERM_IMPRESSION_SHARE => [
+            self::REPORT_PERIOD_DATE_RANGE, self::REPORT_PERIOD_DAILY, self::REPORT_PERIOD_WEEKLY,
+            self::REPORT_PERIOD_MONTHLY, self::REPORT_PERIOD_YEARLY,
+        ],
+        self::REPORT_TYPE_CAMPAIGN_TOP_OF_SEARCH_IMPRESSION_SHARE => [
+            self::REPORT_PERIOD_DATE_RANGE, self::REPORT_PERIOD_DAILY, self::REPORT_PERIOD_WEEKLY,
+            self::REPORT_PERIOD_MONTHLY, self::REPORT_PERIOD_YEARLY,
+        ],
     ];
 
     public static function getReportTypes(): array
@@ -80,11 +102,38 @@ class ReportDefinition
         throw new \InvalidArgumentException("Unknown metricGroup: {$metricGroup}");
     }
 
-    public static function getMaxDateRangeDaysForReportType(string $reportType): int
+    public static function getFieldsForReportPeriod(string $reportPeriod): array
     {
-        if (!isset(self::MAX_DATE_RANGE_DAYS_BY_REPORT_TYPE[$reportType])) {
+        if (!isset(self::REPORT_PERIOD_FIELDS[$reportPeriod])) {
+            throw new \InvalidArgumentException("Unknown reportPeriod: {$reportPeriod}");
+        }
+        return self::REPORT_PERIOD_FIELDS[$reportPeriod];
+    }
+
+    public static function getDefaultReportPeriod(): string
+    {
+        return self::REPORT_PERIOD_DATE_RANGE;
+    }
+
+    public static function getAllowedReportPeriodsForReportType(string $reportType): array
+    {
+        if (!isset(self::ALLOWED_REPORT_PERIODS_BY_REPORT_TYPE[$reportType])) {
             throw new \InvalidArgumentException("Unknown reportType: {$reportType}");
         }
-        return self::MAX_DATE_RANGE_DAYS_BY_REPORT_TYPE[$reportType];
+        return self::ALLOWED_REPORT_PERIODS_BY_REPORT_TYPE[$reportType];
+    }
+
+    public static function getMaxDateRangeDays(string $reportType, string $reportPeriod): int
+    {
+        self::assertReportTypeAllowsReportPeriod($reportType, $reportPeriod);
+
+        return self::MAX_RANGE_DAYS;
+    }
+
+    private static function assertReportTypeAllowsReportPeriod(string $reportType, string $reportPeriod): void
+    {
+        if (!in_array($reportPeriod, self::getAllowedReportPeriodsForReportType($reportType))) {
+            throw new \InvalidArgumentException("reportPeriod {$reportPeriod} is not allowed for reportType {$reportType}");
+        }
     }
 }
