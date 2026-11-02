@@ -707,6 +707,46 @@ class Client
         return $this->_operation(self::ADS_API_V1_PARTIAL . "query/advertiserAccounts", $data, "POST");
     }
 
+    public function createCampaigns101(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "create/campaigns", $data, "POST");
+    }
+
+    public function createAdGroups101(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "create/adGroups", $data, "POST");
+    }
+
+    public function createTargets101(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "create/targets", $data, "POST");
+    }
+
+    public function createAds101(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "create/ads", $data, "POST");
+    }
+
+    public function updateCampaigns101(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "update/campaigns", $data, "POST");
+    }
+
+    public function updateAdGroups101(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "update/adGroups", $data, "POST");
+    }
+
+    public function updateTargets101(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "update/targets", $data, "POST");
+    }
+
+    public function updateAds101(array $data): array
+    {
+        return $this->_operation(self::ADS_API_V1_PARTIAL . "update/ads", $data, "POST");
+    }
+
     public function requestReport($recordType, $data = null): array
     {
         return $this->_operation("sp/{$recordType}/report", $data, "POST");
